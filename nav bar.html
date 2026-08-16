@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Full Width Fixed Top Navigation Bar</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      transition: background-color 0.4s ease;
+    }
+
+    /* Ginagamit ang transform (GPU-accelerated) at cubic-bezier na may konting "overshoot"
+       para sa mas buhay/fluid na paggalaw ng bubble indicator. */
+    #activeIndicator {
+      will-change: transform;
+      transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Smooth "rising" crossfade para sa icon at label sa loob ng bubble —
+       ang lumalabas na icon ay dahan-dahang lumulubog habang nawawala,
+       at ang papasok na icon ay parang "umaahon"/umaangat papasok sa bilog. */
+    #activeIcon, #activeLabel {
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+    #activeIcon.icon-exit, #activeLabel.icon-exit {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    #activeIcon.icon-enter-start, #activeLabel.icon-enter-start {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    /* Smooth crossfade din para sa theme toggle icon */
+    #themeToggleIcon {
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    #themeToggleIcon.fading {
+      opacity: 0;
+      transform: rotate(-30deg) scale(0.7);
+    }
+
+    /* Nav button icons: gentle scale-up habang nag-hho-hover, dagdag na "polish" */
+    .nav-btn svg {
+      transition: transform 0.25s ease;
+    }
+    .nav-btn:hover svg {
+      transform: scale(1.12);
+    }
+
+    /* Bubble circle: smooth transition ng border color at box-shadow */
+    #bubbleCircle {
+      transition: border-color 0.4s ease, box-shadow 0.3s ease;
+    }
+  </style>
+</head>
+<body id="pageBody" class="h-screen bg-[#475569]">
+
+  <!-- Fixed Top Navigation Bar Container (Inadjust ang taas at padding ng card) -->
+  <header class="fixed top-4 left-6 right-6 z-50">
+    <div class="relative w-full bg-[#12141c] text-white rounded-3xl px-8 pt-5 pb-4 shadow-2xl flex items-center justify-between overflow-visible">
+      
+      <!-- Left Side: My Portfolio Branding -->
+      <div class="text-white font-bold text-lg tracking-wide z-20">
+        My Portfolio
+      </div>
+
+      <!-- Right Side Wrapper containing Nav Items and Indicator -->
+      <div class="relative z-20">
+        
+        <!-- Floating Separated Active Bubble -->
+        <div id="activeIndicator" class="absolute -top-6 left-0 flex flex-col items-center z-10 pointer-events-none" style="width: 72px;">
+          <div id="bubbleCircle" class="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-[0_10px_25px_rgba(0,0,0,0.3)] text-neutral-900 border-4 border-[#475569]">
+            <!-- Dynamic Icon -->
+            <svg id="activeIcon" class="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+          </div>
+          <span id="activeLabel" class="text-xs font-semibold mt-1 text-white">Home</span>
+        </div>
+
+        <!-- Navigation Items & Theme Toggle (Right Aligned) -->
+        <div class="flex items-center space-x-2">
+          
+          <!-- 1. Home -->
+          <button onclick="setActive(0, 'Home', this)" class="nav-btn relative group flex flex-col items-center justify-center py-2 w-[72px] text-neutral-400 hover:text-white transition-opacity duration-300 focus:outline-none" data-icon="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+            <svg class="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+            <span class="absolute -bottom-9 bg-neutral-900 text-white text-[10px] font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-lg whitespace-nowrap">Home</span>
+          </button>
+
+          <!-- 2. About -->
+          <button onclick="setActive(1, 'About', this)" class="nav-btn relative group flex flex-col items-center justify-center py-2 w-[72px] text-neutral-400 hover:text-white transition-opacity duration-300 focus:outline-none" data-icon="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+            <svg class="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="absolute -bottom-9 bg-neutral-900 text-white text-[10px] font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-lg whitespace-nowrap">About</span>
+          </button>
+
+          <!-- 3. Services -->
+          <button onclick="setActive(2, 'Services', this)" class="nav-btn relative group flex flex-col items-center justify-center py-2 w-[72px] text-neutral-400 hover:text-white transition-opacity duration-300 focus:outline-none" data-icon="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9">
+            <svg class="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+            </svg>
+            <span class="absolute -bottom-9 bg-neutral-900 text-white text-[10px] font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-lg whitespace-nowrap">Services</span>
+          </button>
+
+          <!-- 4. Project -->
+          <button onclick="setActive(3, 'Project', this)" class="nav-btn relative group flex flex-col items-center justify-center py-2 w-[72px] text-neutral-400 hover:text-white transition-opacity duration-300 focus:outline-none" data-icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+            <svg class="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
+            <span class="absolute -bottom-9 bg-neutral-900 text-white text-[10px] font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-lg whitespace-nowrap">Project</span>
+          </button>
+
+          <!-- 5. Certificate -->
+          <button onclick="setActive(4, 'Certificate', this)" class="nav-btn relative group flex flex-col items-center justify-center py-2 w-[72px] text-neutral-400 hover:text-white transition-opacity duration-300 focus:outline-none" data-icon="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z">
+            <svg class="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+            </svg>
+            <span class="absolute -bottom-9 bg-neutral-900 text-white text-[10px] font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-lg whitespace-nowrap">Certificate</span>
+          </button>
+
+          <!-- 6. Theme Toggle Button -->
+          <button onclick="toggleTheme(this)" class="relative group flex flex-col items-center justify-center py-2 w-[72px] text-neutral-400 hover:text-white transition-opacity duration-300 focus:outline-none">
+            <svg id="themeToggleIcon" class="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+            </svg>
+            <span id="themeToggleTooltip" class="absolute -bottom-9 bg-neutral-900 text-white text-[10px] font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-lg whitespace-nowrap">Dark Mode</span>
+          </button>
+
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- JavaScript -->
+  <script>
+    let isDarkMode = true;
+    let activeIndex = 0;
+
+    function setActive(index, labelText, element) {
+      activeIndex = index;
+      const indicator = document.getElementById('activeIndicator');
+      const bubbleCircle = document.getElementById('bubbleCircle');
+      const activeIcon = document.getElementById('activeIcon');
+      const activeLabel = document.getElementById('activeLabel');
+      const buttons = document.querySelectorAll('.nav-btn');
+
+      const targetLeft = element.offsetLeft;
+      // translate3d para gamitin ang GPU compositing — mas smooth kaysa 2D translateX lang
+      indicator.style.transform = `translate3d(${targetLeft}px, 0, 0)`;
+
+      // I-restart ang spin animation ng bilog sa bawat paglipat ng active item
+      bubbleCircle.classList.remove('spinning');
+      void bubbleCircle.offsetWidth; // force reflow para ma-restart ang animation
+      bubbleCircle.classList.add('spinning');
+
+      // I-lubog/i-fade out muna ang kasalukuyang icon at label
+      activeIcon.classList.add('icon-exit');
+      activeLabel.classList.add('icon-exit');
+
+      setTimeout(() => {
+        const iconPath = element.getAttribute('data-icon');
+        activeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="${iconPath}" />`;
+        activeLabel.textContent = labelText;
+
+        // Ihanda ang bagong icon/label sa "ibaba, invisible" na posisyon bago
+        // i-trigger ang pag-ahon papasok sa bilog
+        activeIcon.classList.remove('icon-exit');
+        activeLabel.classList.remove('icon-exit');
+        activeIcon.classList.add('icon-enter-start');
+        activeLabel.classList.add('icon-enter-start');
+
+        // Force reflow para tiyak na maganap ang transition papunta sa normal state
+        void activeIcon.offsetWidth;
+        activeIcon.classList.remove('icon-enter-start');
+        activeLabel.classList.remove('icon-enter-start');
+      }, 180);
+
+      buttons.forEach((btn, idx) => {
+        if (idx === index) {
+          btn.style.opacity = '0';
+          btn.style.pointerEvents = 'none';
+        } else {
+          btn.style.opacity = '1';
+          btn.style.pointerEvents = 'auto';
+        }
+      });
+    }
+
+    function toggleTheme(element) {
+      const pageBody = document.getElementById('pageBody');
+      const bubbleCircle = document.getElementById('bubbleCircle');
+      const themeToggleIcon = document.getElementById('themeToggleIcon');
+      const themeToggleTooltip = document.getElementById('themeToggleTooltip');
+
+      isDarkMode = !isDarkMode;
+
+      // I-fade out ang theme icon bago palitan ang path, para hindi biglaan ang swap
+      themeToggleIcon.classList.add('fading');
+
+      setTimeout(() => {
+        if (isDarkMode) {
+          pageBody.style.backgroundColor = '#475569';
+          bubbleCircle.style.borderColor = '#475569';
+          themeToggleIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>`;
+          themeToggleTooltip.textContent = "Dark Mode";
+        } else {
+          pageBody.style.backgroundColor = '#e2e8f0';
+          bubbleCircle.style.borderColor = '#e2e8f0';
+          themeToggleIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>`;
+          themeToggleTooltip.textContent = "Light Mode";
+        }
+
+        themeToggleIcon.classList.remove('fading');
+      }, 250);
+
+      const buttons = document.querySelectorAll('.nav-btn');
+      setActive(activeIndex, buttons[activeIndex].querySelector('span').textContent, buttons[activeIndex]);
+    }
+
+    window.onload = () => {
+      const firstBtn = document.querySelector('.nav-btn');
+      setActive(0, 'Home', firstBtn);
+    };
+  </script>
+
+</body>
+</html>

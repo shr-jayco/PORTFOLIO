@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Datamex College of Saint Adeline</title>
+
+  <!-- Tailwind CSS CDN (para sa testimonials section) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#8B263E',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      overflow-x: hidden;
+      background-color: #ffffff;
+    }
+
+    .hero-spacer {
+      position: relative;
+      width: 100%;
+      /* height dito ay itinatakda ng JS batay sa scrollHeightMultiplier */
+    }
+
+    .hero {
+      background: #f5f5f5;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .hero-video {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: cover;
+      z-index: 1;
+      filter: brightness(0.65);
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 8%;
+      background: linear-gradient(135deg, #a74444 0%, #8b3a3a 100%);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    .navbar:hover {
+      box-shadow: 0 6px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .brand:hover {
+      transform: scale(1.05);
+    }
+
+    .brand img {
+      height: 50px;
+      width: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+      transition: transform 0.3s ease;
+    }
+
+    .brand:hover img {
+      transform: rotate(5deg) scale(1.1);
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 35px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+      position: relative;
+      transition: all 0.3s ease;
+      padding: 8px 0;
+      border-radius: 999px;
+    }
+
+    .nav-links a::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 3px;
+      background: white;
+      transition: width 0.3s ease;
+      border-radius: 999px;
+    }
+
+    .nav-links a:hover::before {
+      width: 100%;
+    }
+
+    .nav-links a.active,
+    .nav-links a.active:hover {
+      color: #ffd166;
+      background: rgba(255, 209, 102, 0.12);
+      padding: 8px 14px;
+    }
+
+    .nav-links a:hover {
+      color: #ffcc00;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 20;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    .hero-content h1 {
+      font-size: 2.8rem;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      color: #4772a3;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+    }
+
+    .accent {
+      color: #a14242;
+    }
+
+    .hero-text {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      color: #f7f7f7;
+      font-weight: bold;
+      text-transform: uppercase;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+    }
+
+    .next-section {
+      padding-top: 90px;
+    }
+
+    .btn {
+      display: inline-block;
+      background: #C0392B;
+      color: #ffffff;
+      padding: 10px 28px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      transition: background 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+
+    .btn:hover {
+      background: #962d22;
+    }
+
+    .next-section {
+      position: relative; /* normal flow na — awtomatikong susunod pagkatapos ng hero-spacer */
+      width: 100%;
+      background: #ffffff;
+      padding: 50px;
+      box-sizing: border-box;
+      min-height: 100vh;
+      z-index: 2;
+      box-shadow: 0 -10px 20px rgba(0,0,0,0.1);
+    }
+
+    .footer {
+      background: #0f172a;
+      color: white;
+      text-align: center;
+      padding: 40px 8%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .footer h2 {
+      margin-bottom: 15px;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .footer p {
+      margin: 10px 0;
+      font-size: 0.95rem;
+      color: #ffffff;
+      max-width: 760px;
+      line-height: 1.7;
+      text-align: center;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .footer p + p {
+      margin-top: 8px;
+    }
+
+    /* --- Testimonials marquee styles --- */
+    @keyframes scrollColumn {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-50%); }
+    }
+
+    .animate-marquee-1 { animation: scrollColumn 20s linear infinite; }
+    .animate-marquee-2 { animation: scrollColumn 24s linear infinite; }
+    .animate-marquee-3 { animation: scrollColumn 22s linear infinite; }
+
+    .marquee-container:hover ul {
+      animation-play-state: paused;
+    }
+
+    .mask-gradient {
+      mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+      -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+    }
+  </style>
+</head>
+<body>
+
+    <div class="hero-spacer">
+      <header class="hero">
+        <video class="hero-video" src="pictures/video.mp4" muted playsinline preload="auto"></video>
+
+        <nav class="navbar">
+          <div class="brand">
+            <img src="pictures/datamex logo.jpg" alt="School Logo"> Datamex College of Saint Adeline
+          </div>
+          <ul class="nav-links">
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="academics.html">Academics</a></li>
+            <li><a href="registration.html">Registration</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </nav>
+
+        <div class="hero-content">
+          <div>
+            <h1>Your Path To <span class="accent">Success</span> Starts Here</h1>
+            <p class="hero-text">
+              Datamex College of Saint Adeline
+            </p>
+            <a class="btn" href="registration.html">Enroll Now</a>
+          </div>
+        </div>
+      </header>
+    </div>
+
+
+      <!-- Testimonials Section -->
+      <main class="next-section bg-transparent dark:bg-neutral-950 py-24 relative overflow-hidden transition-colors duration-300">
+        <div class="container px-4 z-10 mx-auto">
+
+          <!-- Heading -->
+          <div class="flex flex-col items-center justify-center max-w-[600px] mx-auto mb-16 text-center">
+            <div class="border border-neutral-300 dark:border-neutral-700 py-1 px-4 rounded-full text-xs font-semibold tracking-wide uppercase text-neutral-600 dark:text-neutral-400 bg-neutral-100/50 dark:bg-neutral-800/50">
+              Student Feedback
+            </div>
+            <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mt-6 text-neutral-900 dark:text-white">
+              Real stories, honest feedback, and experiences from our diverse community of learners.
+            </h2>
+          </div>
+
+          <!-- Columns Container -->
+          <div class="flex justify-center gap-6 mt-10 mask-gradient max-h-[780px] overflow-hidden marquee-container">
+
+            <!-- Column 1 -->
+            <div class="w-full max-w-md">
+              <ul class="flex flex-col gap-6 pb-6 list-none m-0 p-0 animate-marquee-1" id="col-1"></ul>
+            </div>
+
+            <!-- Column 2 -->
+            <div class="hidden md:block w-full max-w-md">
+              <ul class="flex flex-col gap-6 pb-6 list-none m-0 p-0 animate-marquee-2" id="col-2"></ul>
+            </div>
+
+            <!-- Column 3 -->
+            <div class="hidden lg:block w-full max-w-md">
+              <ul class="flex flex-col gap-6 pb-6 list-none m-0 p-0 animate-marquee-3" id="col-3"></ul>
+            </div>
+
+          </div>
+        </div>
+      </main>
+
+      <footer id="contact" class="footer">
+        <h2>Contact Us</h2>
+        <p>2nd flr. Gotaco Bldg 2, 32 MacArthur Highway, Valenzuela, 1440 Metro Manila</p>
+        <p>Facebook: DATAMEX College of Saint Adeline</p>
+        <p>Telephone: 8292-7536</p>
+      </footer>
+
+    <!-- Testimonials data + rendering -->
+    <script>
+      const testimonials = [
+        {
+          text: "Sobrang ganda ng mga laboratory facilities at mababait ang mga instructor dito sa STEM. Marami akong natutunang hands-on experiments!",
+          role: "Grade 12 - STEM Student",
+          stars: 5
+        },
+        {
+          text: "Bilang isang HE student, napakaganda ng mga kagamitan namin sa pagluluto at housekeeping. Talagang handa kami sa TESDA exams.",
+          role: "Grade 11 - Home Economics (HE)",
+          stars: 4
+        },
+        {
+          text: "Ang ganda ng sistema rito sa ABM, natutunan ko ang tamang pagpaplano ng negosyo at accounting gamit ang modernong pasilidad.",
+          role: "Grade 12 - ABM Student",
+          stars: 5
+        },
+        {
+          text: "Laging updated ang mga computer units sa ICT lab namin. Walang kahirap-hirap mag-code at mag-practice ng networking.",
+          role: "Grade 11 - ICT Student",
+          stars: 5
+        },
+        {
+          text: "Bilang isang IT student sa kolehiyo, bilib ako sa curriculum dahil talagang tinuturuan kami ng tamang system testing at coding.",
+          role: "1st Year - BSIT Student",
+          stars: 4
+        },
+        {
+          text: "Maraming aktibidad sa HUMSS na nagpapatalas ng aming communication skills at critical thinking. Super supportive ng mga guro.",
+          role: "Grade 12 - HUMSS Student",
+          stars: 5
+        },
+        {
+          text: "Maganda ang environment sa GAS, nabibigyan kami ng kalayaan na pag-aralan ang iba't ibang subject bago pumasok sa kolehiyo.",
+          role: "Grade 11 - GAS Student",
+          stars: 3
+        },
+        {
+          text: "Sa Office Administration, natutunan ko ang propesyonal na pamamahala ng opisina at magandang customer service.",
+          role: "2nd Year - Office Admin",
+          stars: 5
+        },
+        {
+          text: "Sulit na sulit ang pag-aaral dito sa paaralan. Bukod sa de-kalidad na edukasyon, abot-kaya pa ang matrikula para sa lahat.",
+          role: "Grade 12 - ICT Student",
+          stars: 4
+        },
+      ];
+
+      const firstColumn = testimonials.slice(0, 3);
+      const secondColumn = testimonials.slice(3, 6);
+      const thirdColumn = testimonials.slice(6, 9);
+
+      function renderStars(count) {
+        let starsHTML = '';
+        for (let i = 0; i < 5; i++) {
+          if (i < count) {
+            starsHTML += `<svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.399 8.168-7.333-3.854-7.333 3.854 1.399-8.168-5.934-5.787 8.2-1.192z"/></svg>`;
+          } else {
+            starsHTML += `<svg class="w-4 h-4 text-neutral-300 dark:text-neutral-700 fill-current" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.399 8.168-7.333-3.854-7.333 3.854 1.399-8.168-5.934-5.787 8.2-1.192z"/></svg>`;
+          }
+        }
+        return `<div class="flex gap-1 mb-3">${starsHTML}</div>`;
+      }
+
+      function populateColumn(elementId, items) {
+        const ul = document.getElementById(elementId);
+        const duplicatedItems = [...items, ...items];
+
+        ul.innerHTML = duplicatedItems.map(({ text, role, stars }) => `
+          <li class="p-8 rounded-3xl border border-neutral-200 dark:border-neutral-800 shadow-xl shadow-black/5 w-full bg-white dark:bg-neutral-900 transition-all duration-300 cursor-default select-none group hover:-translate-y-2 hover:scale-[1.02]">
+            <blockquote class="m-0 p-0">
+              ${renderStars(stars)}
+              <p class="text-neutral-700 dark:text-neutral-300 leading-relaxed font-normal m-0 text-base">
+                "${text}"
+              </p>
+              <footer class="flex items-center gap-3 mt-6">
+                <div class="h-11 w-11 rounded-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center text-neutral-500 dark:text-neutral-400 ring-2 ring-neutral-100 dark:ring-neutral-800">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                  </svg>
+                </div>
+                <div class="flex flex-col">
+                  <cite class="font-semibold not-italic tracking-tight leading-5 text-neutral-900 dark:text-white">
+                    Anonymous Student
+                  </cite>
+                  <span class="text-xs leading-5 tracking-tight text-[#8B263E] dark:text-[#ffcc00] font-medium mt-0.5">
+                    ${role}
+                  </span>
+                </div>
+              </footer>
+            </blockquote>
+          </li>
+        `).join('');
+      }
+
+      window.addEventListener('DOMContentLoaded', () => {
+        populateColumn('col-1', firstColumn);
+        populateColumn('col-2', secondColumn);
+        populateColumn('col-3', thirdColumn);
+      });
+
+      function toggleDarkMode() {
+        const html = document.documentElement;
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+
+        if (html.classList.contains('dark')) {
+          html.classList.remove('dark');
+          sunIcon.classList.add('hidden');
+          moonIcon.classList.remove('hidden');
+        } else {
+          html.classList.add('dark');
+          sunIcon.classList.remove('hidden');
+          moonIcon.classList.add('hidden');
+        }
+      }
+    </script>
+
+    <!-- Scroll-driven hero video script -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const heroSpacer = document.querySelector(".hero-spacer");
+        const heroSection = document.querySelector(".hero");
+        const video = document.querySelector(".hero-video");
+
+        // Siguraduhing naka-load ang buong video data para maiwasan ang buffering sa gitna
+        video.pause();
+
+        video.addEventListener("loadedmetadata", function () {
+          const scrollHeightMultiplier = 3.5; // Mas pinaikling scroll distance para hindi mabigat sa video timeline
+
+          // Ito na lang ang tanging "puwang" na ginagawa para sa scroll-scrubbing ng video.
+          // Ang natitirang content (next-section, testimonials, footer, atbp.) ay susunod
+          // na lang nang NORMAL sa document flow pagkatapos ng spacer na ito — kaya kahit
+          // gaano pa kahaba ang laman sa ibaba, tama pa rin ang pag-uugnay.
+          const spacerHeight = window.innerHeight * scrollHeightMultiplier;
+          heroSpacer.style.height = `${spacerHeight}px`;
+
+          let targetTime = 0;
+          let currentTime = 0;
+          const smoothing = 0.1; // Balanced na bilis — hindi masyadong mabilis (para hindi mag-queue ng seeks)
+          let ticking = false;
+
+          // MAHALAGA: sinusubaybayan kung "busy" pa ang video sa pag-seek.
+          // Ito ang pumipigil sa "pop up picture" / stutter effect sa gitna-hanggang-dulo ng video —
+          // dating code kasi, patuloy itong nagpapadala ng bagong seek command kahit hindi pa
+          // tapos ang kasalukuyang isa, kaya nag-uumpon ang mga seeks at nagiging biglaan/tumatalon.
+          let isSeeking = false;
+          video.addEventListener("seeking", function () { isSeeking = true; });
+          video.addEventListener("seeked", function () { isSeeking = false; });
+
+          function updateScrollState() {
+            const scrollTop = window.pageYOffset;
+            const maxScroll = spacerHeight - window.innerHeight;
+
+            let scrollFraction = scrollTop / maxScroll;
+            scrollFraction = Math.max(0, Math.min(1, scrollFraction));
+
+            targetTime = scrollFraction * video.duration;
+
+            if (scrollTop >= maxScroll) {
+              // Tapos na ang video scrub animation — i-release na ang hero mula sa
+              // "fixed" papunta sa "absolute" (relative sa hero-spacer), para awtomatiko
+              // na itong mag-scroll paalis kasabay ng normal na pag-scroll pababa,
+              // at maipakita ang susunod na section nang tuloy-tuloy at hindi biglaan.
+              heroSection.style.position = "absolute";
+              heroSection.style.top = `${maxScroll}px`;
+            } else {
+              heroSection.style.position = "fixed";
+              heroSection.style.top = "0";
+            }
+          }
+
+          function renderLoop() {
+            currentTime += (targetTime - currentTime) * smoothing;
+
+            // Huwag mag-isyu ng bagong seek kung "busy" pa ang video sa pag-seek ng dati.
+            // Ito ang pinaka-mahalagang fix para sa progressive lag/pop-up frame issue.
+            if (!isSeeking && Math.abs(targetTime - currentTime) > 0.01) {
+              video.currentTime = currentTime;
+            }
+
+            requestAnimationFrame(renderLoop);
+          }
+
+          window.addEventListener("scroll", function () {
+            if (!ticking) {
+              requestAnimationFrame(function () {
+                updateScrollState();
+                ticking = false;
+              });
+              ticking = true;
+            }
+          }, { passive: true });
+
+          updateScrollState();
+          requestAnimationFrame(renderLoop);
+        });
+      });
+    </script>
+</body>
+</html>

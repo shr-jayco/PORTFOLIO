@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive 3D Robot - Whobee</title>
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para sa Social Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js Library para sa Robot at Valenzuela Campus 3D Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        .blue-lighting {
+            filter: hue-rotate(270deg) saturate(1.8) brightness(1.2);
+            transform: translate(320px, 140px) scale(0.85);
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .typing-cursor {
+            animation: blink 0.7s infinite;
+        }
+        
+        /* Down-to-Up Fade Scroll Animations */
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.9s ease-out, transform 0.9s ease-out;
+            will-change: opacity, transform;
+        }
+        .reveal-up.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Infinite Slider Keyframes & Styles */
+        @keyframes scrollLeft {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-33.333%); }
+        }
+
+        .slider-track {
+            display: flex;
+            width: max-content;
+            animation: scrollLeft 25s linear infinite;
+        }
+
+        .slider-track:hover {
+            animation-play-state: paused;
+        }
+
+        #robot-canvas-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* New Navbar Specific Styles */
+        #activeIndicator {
+            will-change: transform;
+            transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        #activeIcon, #activeLabel {
+            transition: opacity 0.22s ease, transform 0.22s ease;
+        }
+        #activeIcon.icon-exit, #activeLabel.icon-exit {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        #activeIcon.icon-enter-start, #activeLabel.icon-enter-start {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        #themeToggleIcon {
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+        #themeToggleIcon.fading {
+            opacity: 0;
+            transform: rotate(-30deg) scale(0.7);
+        }
+        .nav-btn svg {
+            transition: transform 0.25s ease;
+        }
+        .nav-btn:hover svg {
+            transform: scale(1.12);
+        }
+        #bubbleCircle {
+            transition: border-color 0.4s ease, box-shadow 0.3s ease;
+        }
+
+        /* Light mode styles for navigation icons */
+        body.light-mode .nav-btn svg {
+            stroke: #3D2817;
+        }
+
+        body.light-mode .nav-btn:hover svg {
+            stroke: #D97706;
+        }
+
+        body.light-mode #activeIcon {
+            stroke: #FDFBF7;
+        }
+
+        body.light-mode #themeToggleIcon {
+            stroke: #3D2817;
+        }
+    </style>
+</head>
+<body id="pageBody" class="bg-[#FDFBF7] text-[#3D2817] m-0 p-0 font-sans transition-colors duration-400 light-mode">
+
+    <!-- Fixed Top Navigation Bar -->
+    <header class="fixed top-4 left-6 right-6 z-50">
+        <div id="navContainer" class="relative w-full bg-[#EBF3F9] text-[#3D2817] rounded-3xl px-8 pt-5 pb-4 shadow-2xl flex items-center justify-between overflow-visible transition-colors duration-400">
+            
+            <!-- Left Side: My Portfolio Branding -->
+            <div id="brandTitle" class="text-[#3D2817] font-bold text-lg tracking-wide z-20 transition-colors duration-400">
+                MY PORTFOLIO
+            </div>
+
+            <!-- Right Side Wrapper containing Nav Items and Indicator -->
+            <div class="relative z-20">
+                
+                <!-- Floating Separated Active Bubble -->
+                <div id="activeIndicator" class="absolute -top-6 left-0 flex flex-col items-center z-10 pointer-events-none" style="width: 72px;">
+                    <div id="bubbleCircle" class="w-14 h-14 bg-[#3D2817] rounded-full flex items-center justify-center shadow-[0_10px_25px_rgba(0,0,0,0.15)] text-[#FDFBF7] border-4 border-[#EBF3F9]">
+                        <!-- Dynamic Icon -->
+                        <svg id="activeIcon" class="w-6 h-6 stroke-[2]" fill="none" stroke="#FDFBF7" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                        </svg>
+                    </div>
+                    <span id="activeLabel" class="text-xs font-bold mt-1 text-[#4A3525] transition-colors duration-400">HOME</span>
+                </div>
+
+                <!-- Navigation Items & Theme Toggle -->
+                <div class="flex items-center space-x-2">
+                    
+                    <!-- 1. Home -->
+                    <button onclick="scrollToSection('home', 0, 'HOME', this)" class="nav-btn relative group flex flex-col items-center justify-center py-2 w-[72px] text-[#3D2817] hover:text-[#D97706] transition-opacity duration-300 focus:outline-none" data-icon="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                        <svg class="w-6 h-6 stroke-[2]" fill="none" stroke="#3D2817" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                        </svg>
+                        <span class="absolute -bottom-9 bg-[#3D2817] text-[#FDFBF7] text-[10px] font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-lg whitespace-nowrap">HOME</span>
+                    </button>
+
+                    <!-- 2. About -->
+                    <button onclick="scrollToSection('about', 1, 'ABOUT', this)" class="nav-btn relative group flex flex-col items-center justify-center py-2 w-[72px] text-[#3D2817] hover:text-[#D97706] transition-opacity duration-300 focus:outline-none" data-icon="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                        <svg class="w-6 h-6 stroke-[2]" fill="none" stroke="#3D2817" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span class="absolute -bottom-9 bg-[#3D2817] text-[#FDFBF7] text-[10px] font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-lg whitespace-nowrap">ABOUT</span>
+                    </button>
+
+                    <!-- 3. Services -->
+                    <button onclick="scrollToSection('services', 2, 'SERVICES', this)" class="nav-btn relative group flex flex-col items-center justify-center py-2 w-[72px] text-[#3D2817] hover:text-[#D97706] transition-opacity duration-300 focus:outline-none" data-icon="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9">
+                        <svg class="w-6 h-6 stroke-[2]" fill="none" stroke="#3D2817" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                        </svg>
+                        <span class="absolute -bottom-9 bg-[#3D2817] text-[#FDFBF7] text-[10px] font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-lg whitespace-nowrap">SERVICES</span>
+                    </button>
+
+                    <!-- 4. Projects -->
+                    <button onclick="scrollToSection('projects', 3, 'PROJECTS', this)" class="nav-btn relative group flex flex-col items-center justify-center py-2 w-[72px] text-[#3D2817] hover:text-[#D97706] transition-opacity duration-300 focus:outline-none" data-icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+                        <svg class="w-6 h-6 stroke-[2]" fill="none" stroke="#3D2817" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                        <span class="absolute -bottom-9 bg-[#3D2817] text-[#FDFBF7] text-[10px] font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-lg whitespace-nowrap">PROJECTS</span>
+                    </button>
+
+                    <!-- 5. Certificates -->
+                    <button onclick="scrollToSection('certificates', 4, 'CERTIFICATES', this)" class="nav-btn relative group flex flex-col items-center justify-center py-2 w-[72px] text-[#3D2817] hover:text-[#D97706] transition-opacity duration-300 focus:outline-none" data-icon="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z">
+                        <svg class="w-6 h-6 stroke-[2]" fill="none" stroke="#3D2817" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                        </svg>
+                        <span class="absolute -bottom-9 bg-[#3D2817] text-[#FDFBF7] text-[10px] font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-lg whitespace-nowrap">CERTIFICATES</span>
+                    </button>
+
+                    <!-- 6. Theme Toggle Button -->
+                    <button onclick="toggleTheme(this)" class="relative group flex flex-col items-center justify-center py-2 w-[72px] text-[#3D2817] hover:text-[#D97706] transition-opacity duration-300 focus:outline-none">
+                        <svg id="themeToggleIcon" class="w-6 h-6 stroke-[2]" fill="none" stroke="#3D2817" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                        <span id="themeToggleTooltip" class="absolute -bottom-9 bg-[#3D2817] text-[#FDFBF7] text-[10px] font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-lg whitespace-nowrap">Light Mode</span>
+                    </button>
+
+                </div>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- HOME SECTION -->
+    <div id="home" class="relative w-screen h-[85vh] md:h-[90vh] overflow-hidden pt-28 transition-colors duration-500" style="background: linear-gradient(to bottom, #EBF3F9 0%, #E4EDF4 55%, #F7F5F0 65%, #FDFBF7 100%);">
+        <div id="robot-canvas-container" class="absolute inset-0 z-10 pointer-events-none"></div>
+        <div id="homeBottomFade" class="absolute bottom-0 left-0 w-full h-28 bg-gradient-to-t from-[#FDFBF7] to-transparent pointer-events-none z-25 transition-colors duration-400"></div>
+        <div class="absolute inset-0 z-30 flex flex-col justify-center items-center px-4 md:px-12 pointer-events-none">
+            <div class="text-center drop-shadow-lg w-full max-w-6xl px-6">
+                <div id="typingTextWrapper" class="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-widest text-[#3D2817] mb-6 uppercase h-12 flex items-center justify-center reveal-up">
+                    <span id="typing-text"></span><span class="typing-cursor">|</span>
+                </div>
+                <p id="homeDescription" class="text-[#6B4F33] text-lg md:text-xl lg:text-2xl leading-relaxed mb-10 font-semibold text-center reveal-up" style="transition-delay: 150ms;">
+                    I build clean, modern, and fully functional websites from scratch to bring your brand and vision to life. Along with web development, I perform careful system manual testing to check every feature, catch bugs, and ensure everything runs smoothly. Let's work directly together to turn your ideas into a reliable digital product.
+                </p>
+                <div class="flex flex-row justify-center space-x-6 pointer-events-auto reveal-up" style="transition-delay: 300ms;">
+                    <a id="viewProjectsBtn" href="#projects" class="px-8 py-3.5 rounded-full bg-[#EBF3F9] hover:bg-[#E4EDF4] text-[#3D2817] border border-[#6B4F33] font-light transition duration-200 shadow-lg text-lg inline-block">
+                        RESUME
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABOUT SECTION -->
+    <section id="about" class="relative w-full min-h-screen bg-[#FDFBF7] border-t border-[#E4EDF4] flex flex-col justify-between pt-28 overflow-hidden transition-colors duration-400">
+        <div class="max-w-6xl mx-auto w-full px-8 md:px-20 py-16 flex-1 flex items-center justify-center">
+            <div class="hidden md:flex relative items-center justify-center gap-16 w-full">
+                <div id="aboutImgBoxDesktop" class="w-[420px] h-[420px] rounded-3xl overflow-hidden bg-[#EBF3F9] flex-shrink-0 flex items-center justify-center border border-[#6B4F33] shadow-2xl z-0 reveal-up transition-colors duration-400">
+                    <img id="profileImgDesktop" src="images/light mode profile.png" alt="Profile Picture" class="w-full h-full object-cover" draggable="false"/>
+                </div>
+                <div class="flex-1 transition-all duration-300 reveal-up" style="transition-delay: 200ms;">
+                    <div class="mb-5">
+                        <h2 id="aboutTitle" class="text-3xl font-bold text-[#3D2817] mb-2">Ralph Jayco V. Urrutia</h2>
+                        <p id="aboutSubtitle" class="text-base font-medium text-[#D97706]">Information Technology Graduate & Entry-level IT Professional</p>
+                    </div>
+                    <p id="aboutText" class="text-[#6B4F33] text-base md:text-lg leading-relaxed mb-8 font-light">
+                        As an Information Technology graduate, I bridge the gap between creative design and robust technical execution. I specialize in system manual testing and building responsive web applications using modern development tools. Every project is backed by structured test plans and meticulous attention to detail to ensure seamless performance and reliability.
+                    </p>
+                    <div class="flex flex-wrap items-center gap-4">
+                        <a href="https://www.linkedin.com/in/ralph-jayco-urrutia-855170259/" target="_blank" rel="noopener noreferrer" title="Ralph Jayco Urrutia" class="social-icon-btn w-12 h-12 bg-[#F7F5F0] hover:bg-[#EBF3F9] border border-[#6B4F33] rounded-full flex items-center justify-center transition-transform hover:scale-105" aria-label="LinkedIn">
+                            <i class="fa-brands fa-linkedin-in text-[#3D2817] text-lg"></i>
+                        </a>
+                        <a href="https://www.facebook.com/shiro.jyc" target="_blank" rel="noopener noreferrer" title="jayco Urrutia" class="social-icon-btn w-12 h-12 bg-[#F7F5F0] hover:bg-[#EBF3F9] border border-[#6B4F33] rounded-full flex items-center justify-center transition-transform hover:scale-105" aria-label="Facebook">
+                            <i class="fa-brands fa-facebook-f text-[#3D2817] text-lg"></i>
+                        </a>
+                        <a href="mailto:urrutiaralphjayco07@gmail.com" title="urrutiaralphjayco07@gmail.com" class="social-icon-btn w-12 h-12 bg-[#F7F5F0] hover:bg-[#EBF3F9] border border-[#6B4F33] rounded-full flex items-center justify-center transition-transform hover:scale-105" aria-label="Email">
+                            <i class="fa-solid fa-envelope text-[#3D2817] text-lg"></i>
+                        </a>
+                        <a href="tel:+639701706636" title="09701706636" class="social-icon-btn w-12 h-12 bg-[#F7F5F0] hover:bg-[#EBF3F9] border border-[#6B4F33] rounded-full flex items-center justify-center transition-transform hover:scale-105" aria-label="Cellphone Number">
+                            <i class="fa-solid fa-phone text-[#3D2817] text-lg"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Layout -->
+            <div class="md:hidden max-w-sm mx-auto text-center bg-transparent reveal-up w-full">
+                <div id="aboutImgBoxMobile" class="w-full aspect-square bg-[#EBF3F9] rounded-3xl overflow-hidden mb-6 flex items-center justify-center border border-[#6B4F33] shadow-2xl transition-colors duration-400">
+                    <img id="profileImgMobile" src="images/light mode profile.png" alt="Profile Picture" class="w-full h-full object-cover" draggable="false"/>
+                </div>
+                <div class="px-2">
+                    <h2 id="aboutTitleMob" class="text-2xl font-bold text-[#3D2817] mb-2">Ralph Jayco V. Urrutia</h2>
+                    <p id="aboutSubtitleMob" class="text-sm font-medium text-[#D97706] mb-4">Information Technology Graduate & Entry-level IT Professional</p>
+                    <p id="aboutTextMob" class="text-[#6B4F33] text-sm leading-relaxed mb-6 font-light">
+                        As an Information Technology graduate, I bridge the gap between creative design and robust technical execution. I specialize in system manual testing and building responsive web applications using modern development tools. Every project is backed by structured test plans and meticulous attention to detail to ensure seamless performance and reliability.
+                    </p>
+                    <div class="flex justify-center space-x-4">
+                        <a href="https://www.linkedin.com/in/ralph-jayco-urrutia-855170259/" target="_blank" rel="noopener noreferrer" title="Ralph Jayco Urrutia" class="social-icon-btn w-12 h-12 bg-[#F7F5F0] border border-[#6B4F33] rounded-full flex items-center justify-center transition-colors hover:bg-[#EBF3F9]" aria-label="LinkedIn">
+                            <i class="fa-brands fa-linkedin-in text-[#3D2817] text-lg"></i>
+                        </a>
+                        <a href="https://www.facebook.com/shiro.jyc" target="_blank" rel="noopener noreferrer" title="jayco Urrutia" class="social-icon-btn w-12 h-12 bg-[#F7F5F0] border border-[#6B4F33] rounded-full flex items-center justify-center transition-colors hover:bg-[#EBF3F9]" aria-label="Facebook">
+                            <i class="fa-brands fa-facebook-f text-[#3D2817] text-lg"></i>
+                        </a>
+                        <a href="mailto:urrutiaralphjayco07@gmail.com" title="urrutiaralphjayco07@gmail.com" class="social-icon-btn w-12 h-12 bg-[#F7F5F0] border border-[#6B4F33] rounded-full flex items-center justify-center transition-colors hover:bg-[#EBF3F9]" aria-label="Email">
+                            <i class="fa-solid fa-envelope text-[#3D2817] text-lg"></i>
+                        </a>
+                        <a href="tel:+639701706636" title="09701706636" class="social-icon-btn w-12 h-12 bg-[#F7F5F0] border border-[#6B4F33] rounded-full flex items-center justify-center transition-colors hover:bg-[#EBF3F9]" aria-label="Cellphone Number">
+                            <i class="fa-solid fa-phone text-[#3D2817] text-lg"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOWER PART: Infinite Logo Slider -->
+        <div id="sliderWrapper" class="w-full py-6 bg-[#EBF3F9] border-t border-[#E4EDF4] overflow-hidden transition-colors duration-400">
+            <div class="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+                <div class="slider-track flex width-max">
+                    <div class="flex items-center shrink-0">
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-widest text-lg">HTML</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">CSS</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">JAVA</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">Three.js</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">FIGMA</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">21ST DEV</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">SPLINE</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">VB.NET</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">CLAUDE</span></div>
+                    </div>
+                    <div class="flex items-center shrink-0">
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-widest text-lg">HTML</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">CSS</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">JAVA</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">Three.js</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">FIGMA</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">21ST DEV</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">SPLINE</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">VB.NET</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">CLAUDE</span></div>
+                    </div>
+                    <div class="flex items-center shrink-0">
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-widest text-lg">HTML</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">CSS</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">JAVA</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">Three.js</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">FIGMA</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">21ST DEV</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">SPLINE</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">VB.NET</span></div>
+                        <div class="slider-item flex items-center gap-2 px-8 text-[#3D2817] transition cursor-pointer"><span class="font-bold tracking-wider text-lg">CLAUDE</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SERVICES SECTION -->
+    <section id="services" class="py-28 px-8 md:px-20 bg-[#FDFBF7] border-t border-[#E4EDF4] transition-colors duration-400">
+        <div class="max-w-6xl mx-auto">
+            <div class="mb-12 reveal-up">
+                <span id="servicesSub" class="text-[#D97706] text-xs md:text-sm font-bold tracking-widest uppercase block mb-3">SERVICES</span>
+                <h2 id="servicesHeading" class="text-3xl md:text-4xl font-bold text-[#3D2817] tracking-tight">
+                    Focused on building modern websites and user-centered interfaces.
+                </h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="service-card bg-[#EBF3F9] border border-[#6B4F33] rounded-2xl overflow-hidden shadow-2xl flex flex-col justify-between reveal-up transition-colors duration-400">
+                    <div class="w-full h-56 md:h-64 bg-[#E4EDF4] overflow-hidden relative">
+                        <!-- Naka-set na agad sa Light mode image pag-start -->
+                        <img id="serviceImg1" src="images/W. WEB DEVELOPMENT.png" alt="Web Development" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-8">
+                        <h3 class="service-title text-xl md:text-2xl font-bold text-[#3D2817] mb-3">Web Development</h3>
+                        <p class="service-desc text-[#6B4F33] font-light text-base md:text-lg leading-relaxed">
+                            Responsive websites and interactive UI built with modern HTML, CSS, and frontend techniques.
+                        </p>
+                    </div>
+                </div>
+                <div class="service-card bg-[#EBF3F9] border border-[#6B4F33] rounded-2xl overflow-hidden shadow-2xl flex flex-col justify-between reveal-up transition-colors duration-400" style="transition-delay: 200ms;">
+                    <div class="w-full h-56 md:h-64 bg-[#E4EDF4] overflow-hidden relative">
+                        <!-- Naka-set na agad sa Light mode image pag-start -->
+                        <img id="serviceImg2" src="images/W. MANUAL TESTING.png" alt="MANUAL TESTER" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-8">
+                        <h3 class="service-title text-xl md:text-2xl font-bold text-[#3D2817] mb-3">MANUAL TESTER</h3>
+                        <p class="service-desc text-[#6B4F33] font-light text-base md:text-lg leading-relaxed">
+                            Thorough testing and quality assurance to ensure robust and reliable software performance.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PERSONAL PROJECTS SECTION -->
+    <section id="projects" class="py-28 px-8 md:px-20 bg-[#FDFBF7] border-t border-[#E4EDF4] transition-colors duration-400">
+        <div class="max-w-6xl mx-auto">
+            <div class="mb-12 reveal-up">
+                <span id="projectsSub" class="text-[#D97706] text-xs md:text-sm font-bold tracking-widest uppercase block mb-3">PERSONAL PROJECTS</span>
+                <h2 id="projectsHeading" class="text-3xl md:text-4xl font-bold text-[#3D2817] tracking-tight">
+                    Selected work that highlights both visual quality and technical execution.
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                <div id="projectMainBox" class="lg:col-span-2 bg-[#EBF3F9] border border-[#6B4F33] rounded-3xl overflow-hidden shadow-2xl flex flex-col h-[480px] md:h-[540px] relative reveal-up transition-colors duration-400">
+                    <div id="projectBadgeBg" class="absolute top-6 left-6 z-20 bg-[#FDFBF7]/85 backdrop-blur-md px-4 py-2 rounded-xl border border-[#6B4F33] transition-colors duration-400">
+                        <span id="active-project-tag" class="text-xs font-bold text-[#3D2817] tracking-wider uppercase"></span>
+                    </div>
+
+                    <div class="w-full h-full flex items-center justify-center bg-[#E4EDF4] relative overflow-hidden" id="projectScreenBg">
+                        <div class="project-slide absolute inset-0 flex items-center justify-center transition-opacity duration-700 ease-in-out opacity-100 z-10" id="slide-1">
+                            <div id="canvas-viewport" class="w-full h-full"></div>
+                        </div>
+
+                        <div class="project-slide absolute inset-0 flex items-center justify-center p-6 transition-opacity duration-700 ease-in-out opacity-0 pointer-events-none z-0" id="slide-2">
+                            <img src="DENTAL CLINIC WEBSITE/IMAGES/bg for website.png" alt="" class="max-h-full max-w-full object-contain rounded-xl shadow-lg">
+                        </div>
+
+                        <div class="project-slide absolute inset-0 flex items-center justify-center p-6 transition-opacity duration-700 ease-in-out opacity-0 pointer-events-none z-0" id="slide-3">
+                            <img src="images/project-four.jpg" alt="" class="max-h-full max-w-full object-contain rounded-xl shadow-lg">
+                        </div>
+                    </div>
+
+                    <div id="projectFooter" class="py-4 px-6 bg-[#E4EDF4] border-t border-[#6B4F33] flex items-center justify-between relative z-20 transition-colors duration-400">
+                        <p id="active-project-desc" class="text-[#3D2817] font-light text-sm md:text-base">
+                            Interactive 3D Architectural Showcase & System Preview
+                        </p>
+                        <a id="projectVisitLink" href="javascript:void(0);" onclick="openMainWebsite()" class="text-xs text-[#D97706] font-semibold uppercase tracking-wider hover:underline flex items-center gap-1 cursor-pointer">
+                            Visit Website &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <div class="flex flex-col space-y-4 reveal-up" id="rotating-thumbnails" style="transition-delay: 200ms;">
+                    <div onclick="switchProject(1)" id="thumb-1" class="project-thumb cursor-pointer bg-[#EBF3F9] border-2 border-[#D97706] rounded-2xl p-4 flex items-center space-x-4 transition-all shadow-lg opacity-100">
+                        <div class="w-16 h-16 bg-[#E4EDF4] rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center border border-[#6B4F33]">
+                            <img src="images/school logo.jpg" alt="Thumbnail" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="thumb-sub text-xs text-[#6B4F33] font-medium">Datamex College of Saint Adeline</h4>
+                            <p class="thumb-title text-sm font-bold text-[#3D2817]">School website</p>
+                        </div>
+                    </div>
+
+                    <div onclick="switchProject(2)" id="thumb-2" class="project-thumb cursor-pointer bg-[#EBF3F9] border-2 border-[#6B4F33] rounded-2xl p-4 flex items-center space-x-4 transition-all shadow-lg opacity-40 hover:opacity-75">
+                        <div class="w-16 h-16 bg-[#E4EDF4] rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center border border-[#6B4F33]">
+                            <img src="DENTAL CLINIC WEBSITE/IMAGES/solsmile logo.jpg" alt="Thumbnail" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="thumb-sub text-xs text-[#6B4F33] font-medium">Solsmile Dental Clinic</h4>
+                            <p class="thumb-title text-sm font-bold text-[#3D2817]">Clinic Website</p>
+                        </div>
+                    </div>
+
+                    <div onclick="switchProject(3)" id="thumb-3" class="project-thumb cursor-pointer bg-[#EBF3F9] border-2 border-[#6B4F33] rounded-2xl p-4 flex items-center space-x-4 transition-all shadow-lg opacity-40 hover:opacity-75">
+                        <div class="w-16 h-16 bg-[#E4EDF4] rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center border border-[#6B4F33]">
+                            <img src="images/project-four-thumb.jpg" alt="Thumbnail" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="thumb-sub text-xs text-[#6B4F33] font-medium">Restaurant ni aling puring</h4>
+                            <p class="thumb-title text-sm font-bold text-[#3D2817]">Point of Sale System</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- CERTIFICATES SECTION -->
+    <section id="certificates" class="py-28 px-8 md:px-20 bg-[#FDFBF7] border-t border-[#E4EDF4] transition-colors duration-400">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="reveal-up">
+                <h2 id="certHeading" class="text-3xl md:text-5xl font-extrabold tracking-wider text-[#3D2817] mb-4 uppercase">CERTIFICATE</h2>
+                <p id="certSub" class="text-[#6B4F33] text-sm md:text-base font-light tracking-wide mb-16 max-w-2xl mx-auto">
+                    A collection of technical seminars, academic milestones, and professional certificates achieved throughout my Information Technology journey.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+                <div class="cert-card p-6 bg-[#EBF3F9] border border-[#6B4F33] rounded-3xl shadow-2xl flex flex-col justify-between group hover:border-[#D97706] transition duration-300 reveal-up">
+                    <div class="w-full h-80 md:h-96 bg-[#E4EDF4] rounded-2xl overflow-hidden mb-6 flex items-center justify-center border border-[#6B4F33] p-3">
+                        <img src="images/cert1.png" alt="Certificate 1" class="w-full h-full object-contain group-hover:scale-105 transition duration-500">
+                    </div>
+                    <div class="px-2 pb-2">
+                        <h3 class="cert-title text-lg font-bold text-[#3D2817] mb-1">Web Development Seminar</h3>
+                        <p class="cert-desc text-[#6B4F33] text-sm font-light">Understanding HTML and CSS basics and foundations.</p>
+                    </div>
+                </div>
+
+                <div class="cert-card p-6 bg-[#EBF3F9] border border-[#6B4F33] rounded-3xl shadow-2xl flex flex-col justify-between group hover:border-[#D97706] transition duration-300 reveal-up" style="transition-delay: 150ms;">
+                    <div class="w-full h-80 md:h-96 bg-[#E4EDF4] rounded-2xl overflow-hidden mb-6 flex items-center justify-center border border-[#6B4F33] p-3">
+                        <img src="images/cert2.png" alt="Certificate 2" class="w-full h-full object-contain group-hover:scale-105 transition duration-500">
+                    </div>
+                    <div class="px-2 pb-2">
+                        <h3 class="cert-title text-lg font-bold text-[#3D2817] mb-1">Game Fest 2024</h3>
+                        <p class="cert-desc text-[#6B4F33] text-sm font-light">From Imagination to Reality participation certificate.</p>
+                    </div>
+                </div>
+
+                <div class="cert-card p-6 bg-[#EBF3F9] border border-[#6B4F33] rounded-3xl shadow-2xl flex flex-col justify-between group hover:border-[#D97706] transition duration-300 reveal-up" style="transition-delay: 300ms;">
+                    <div class="w-full h-80 md:h-96 bg-[#E4EDF4] rounded-2xl overflow-hidden mb-6 flex items-center justify-center border border-[#6B4F33] p-3">
+                        <img src="images/cert3.png" alt="Certificate 3" class="w-full h-full object-contain group-hover:scale-105 transition duration-500">
+                    </div>
+                    <div class="px-2 pb-2">
+                        <h3 class="cert-title text-lg font-bold text-[#3D2817] mb-1">Project Loons Seminar</h3>
+                        <p class="cert-desc text-[#6B4F33] text-sm font-light">Active participation, cooperation, and learning engagement.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Intersection Observer para sa Down-to-Up Fade Animations
+        document.addEventListener("DOMContentLoaded", function () {
+            const observerOptions = { root: null, rootMargin: '0px', threshold: 0.15 };
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('revealed');
+                    } else {
+                        entry.target.classList.remove('revealed');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.reveal-up').forEach(el => observer.observe(el));
+
+            const sections = document.querySelectorAll('div[id], section[id]');
+            let isManualScrolling = false;
+
+            window.addEventListener('scroll', () => {
+                if (isManualScrolling) return;
+                
+                let currentScroll = window.scrollY + (window.innerHeight / 3);
+                sections.forEach(section => {
+                    let sectionTop = section.offsetTop;
+                    let sectionHeight = section.offsetHeight;
+                    let sectionId = section.getAttribute('id');
+
+                    if (currentScroll >= sectionTop && currentScroll < sectionTop + sectionHeight) {
+                        const buttons = document.querySelectorAll('.nav-btn');
+                        if (sectionId === 'home' && activeIndex !== 0) setActive(0, 'HOME', buttons[0], false);
+                        else if (sectionId === 'about' && activeIndex !== 1) setActive(1, 'ABOUT', buttons[1], false);
+                        else if (sectionId === 'services' && activeIndex !== 2) setActive(2, 'SERVICES', buttons[2], false);
+                        else if (sectionId === 'projects' && activeIndex !== 3) setActive(3, 'PROJECTS', buttons[3], false);
+                        else if (sectionId === 'certificates' && activeIndex !== 4) setActive(4, 'CERTIFICATES', buttons[4], false);
+                    }
+                });
+            });
+
+            const firstBtn = document.querySelector('.nav-btn');
+            if(firstBtn) setActive(0, 'HOME', firstBtn, false);
+            
+            window.isManualScrolling = function(val) {
+                isManualScrolling = val;
+            }
+        });
+
+        let isDarkMode = false;
+        let activeIndex = 0;
+
+        function setActive(index, labelText, element, shouldScroll = true) {
+            activeIndex = index;
+            const indicator = document.getElementById('activeIndicator');
+            const activeIcon = document.getElementById('activeIcon');
+            const activeLabel = document.getElementById('activeLabel');
+            const buttons = document.querySelectorAll('.nav-btn');
+
+            const targetLeft = element.offsetLeft;
+            indicator.style.transform = `translate3d(${targetLeft}px, 0, 0)`;
+
+            activeIcon.classList.add('icon-exit');
+            activeLabel.classList.add('icon-exit');
+
+            setTimeout(() => {
+                const iconPath = element.getAttribute('data-icon');
+                activeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="${iconPath}" />`;
+                activeLabel.textContent = labelText;
+
+                if (document.getElementById('pageBody').classList.contains('light-mode') || !isDarkMode) {
+                    activeLabel.style.color = '#4A3525';
+                } else {
+                    activeLabel.style.color = '#ffffff';
+                }
+
+                activeIcon.classList.remove('icon-exit');
+                activeLabel.classList.remove('icon-exit');
+                activeIcon.classList.add('icon-enter-start');
+                activeLabel.classList.add('icon-enter-start');
+
+                void activeIcon.offsetWidth;
+                activeIcon.classList.remove('icon-enter-start');
+                activeLabel.classList.remove('icon-enter-start');
+            }, 180);
+
+            buttons.forEach((btn, idx) => {
+                if (idx === index) {
+                    btn.style.opacity = '0';
+                    btn.style.pointerEvents = 'none';
+                } else {
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                    const btnSvg = btn.querySelector('svg');
+                    if (btnSvg) {
+                        if (document.getElementById('pageBody').classList.contains('light-mode') || !isDarkMode) {
+                            btnSvg.style.stroke = '#3D2817';
+                        } else {
+                            btnSvg.style.stroke = '#9ca3af';
+                        }
+                    }
+                }
+            });
+
+            if (shouldScroll) {
+                if (window.isManualScrolling) window.isManualScrolling(true);
+                const targetId = element.getAttribute('onclick').match(/'([^']+)'/)[1];
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                    setTimeout(() => {
+                        if (window.isManualScrolling) window.isManualScrolling(false);
+                    }, 800);
+                }
+            }
+        }
+
+        function scrollToSection(sectionId, index, labelText, element) {
+            setActive(index, labelText, element, true);
+        }
+
+        function toggleTheme(element) {
+            const pageBody = document.getElementById('pageBody');
+            const homeSection = document.getElementById('home');
+            const homeBottomFade = document.getElementById('homeBottomFade');
+            const homeDescription = document.getElementById('homeDescription');
+            const typingTextWrapper = document.getElementById('typingTextWrapper');
+            const viewProjectsBtn = document.getElementById('viewProjectsBtn');
+            const themeToggleIcon = document.getElementById('themeToggleIcon');
+            const themeToggleTooltip = document.getElementById('themeToggleTooltip');
+            
+            const profileImgDesktop = document.getElementById('profileImgDesktop');
+            const profileImgMobile = document.getElementById('profileImgMobile');
+            const aboutImgBoxDesktop = document.getElementById('aboutImgBoxDesktop');
+            const aboutImgBoxMobile = document.getElementById('aboutImgBoxMobile');
+
+            const serviceImg1 = document.getElementById('serviceImg1');
+            const serviceImg2 = document.getElementById('serviceImg2');
+            
+            const navContainer = document.getElementById('navContainer');
+            const brandTitle = document.getElementById('brandTitle');
+            const bubbleCircle = document.getElementById('bubbleCircle');
+            const activeLabel = document.getElementById('activeLabel');
+
+            isDarkMode = !isDarkMode;
+
+            themeToggleIcon.classList.add('fading');
+
+            setTimeout(() => {
+                if (isDarkMode) {
+                    // --- DARK MODE ---
+                    pageBody.style.backgroundColor = '#000000';
+                    pageBody.style.color = '#ffffff';
+                    pageBody.classList.remove('light-mode');
+                    
+                    if(profileImgDesktop) profileImgDesktop.src = 'images/pic.jpg';
+                    if(profileImgMobile) profileImgMobile.src = 'images/pic.jpg';
+
+                    // Ibinabalik ang orihinal na pictures kapag Dark Mode
+                    if(serviceImg1) serviceImg1.src = 'images/web dev bg.jpg';
+                    if(serviceImg2) serviceImg2.src = 'images/B. MANUAL TESTING.jpg';
+
+                    if(aboutImgBoxDesktop) {
+                        aboutImgBoxDesktop.style.backgroundColor = '#0b0f19';
+                        aboutImgBoxDesktop.style.borderColor = '#1f2937';
+                    }
+                    if(aboutImgBoxMobile) {
+                        aboutImgBoxMobile.style.backgroundColor = '#0b0f19';
+                        aboutImgBoxMobile.style.borderColor = '#1f2937';
+                    }
+
+                    navContainer.style.backgroundColor = '#12141c';
+                    brandTitle.style.color = '#ffffff';
+                    bubbleCircle.style.backgroundColor = '#ffffff';
+                    bubbleCircle.style.borderColor = '#12141c';
+                    activeLabel.style.color = '#ffffff';
+                    document.getElementById('activeIcon').style.stroke = '#1A068C';
+                    
+                    document.querySelectorAll('.nav-btn svg').forEach(svg => {
+                        svg.style.stroke = '#9ca3af';
+                    });
+                    document.getElementById('themeToggleIcon').style.stroke = '#9ca3af';
+
+                    homeSection.style.backgroundColor = '#000000';
+                    homeSection.style.background = 'none';
+                    if(homeBottomFade) homeBottomFade.className = "absolute bottom-0 left-0 w-full h-28 bg-gradient-to-t from-[#000000] to-transparent pointer-events-none z-25 transition-colors duration-400";
+                    typingTextWrapper.style.color = '#ffffff';
+                    homeDescription.style.color = '#ffffff';
+                    if(viewProjectsBtn) {
+                        viewProjectsBtn.style.backgroundColor = '#0b0f19';
+                        viewProjectsBtn.style.borderColor = '#1f2937';
+                        viewProjectsBtn.style.color = '#ffffff';
+                    }
+
+                    document.getElementById('about').style.backgroundColor = '#000000';
+                    document.getElementById('about').style.borderColor = '#1f2937';
+                    document.getElementById('aboutTitle').style.color = '#ffffff';
+                    document.getElementById('aboutSubtitle').style.color = '#60a5fa';
+                    document.getElementById('aboutText').style.color = '#d1d5db';
+                    document.getElementById('aboutTitleMob').style.color = '#ffffff';
+                    document.getElementById('aboutSubtitleMob').style.color = '#60a5fa';
+                    document.getElementById('aboutTextMob').style.color = '#d1d5db';
+                    document.getElementById('sliderWrapper').style.backgroundColor = '#0b0f19';
+                    document.getElementById('sliderWrapper').style.borderColor = '#1f2937';
+                    document.querySelectorAll('.slider-item').forEach(item => {
+                        item.classList.remove('text-[#3D2817]');
+                        item.classList.add('text-gray-400');
+                    });
+                    document.querySelectorAll('.social-icon-btn').forEach(btn => {
+                        btn.style.backgroundColor = '#0b0f19';
+                        btn.style.borderColor = '#1f2937';
+                        const iconEl = btn.querySelector('i');
+                        if (iconEl) iconEl.style.color = '#ffffff';
+                    });
+
+                    document.getElementById('services').style.backgroundColor = '#000000';
+                    document.getElementById('services').style.borderColor = '#1f2937';
+                    document.getElementById('servicesSub').style.color = '#2dd4bf';
+                    document.getElementById('servicesHeading').style.color = '#ffffff';
+                    document.querySelectorAll('.service-card').forEach(card => {
+                        card.style.backgroundColor = '#0b0f19';
+                        card.style.borderColor = '#1f2937';
+                    });
+                    document.querySelectorAll('.service-card img').forEach(img => {
+                        img.parentElement.style.backgroundColor = '#050505';
+                    });
+                    document.querySelectorAll('.service-title').forEach(t => t.style.color = '#ffffff');
+                    document.querySelectorAll('.service-desc').forEach(d => d.style.color = '#9ca3af');
+
+                    document.getElementById('projects').style.backgroundColor = '#000000';
+                    document.getElementById('projects').style.borderColor = '#1f2937';
+                    document.getElementById('projectsSub').style.color = '#2dd4bf';
+                    document.getElementById('projectsHeading').style.color = '#ffffff';
+                    document.getElementById('projectMainBox').style.backgroundColor = '#0b0f19';
+                    document.getElementById('projectMainBox').style.borderColor = '#1f2937';
+                    document.getElementById('projectBadgeBg').style.backgroundColor = 'rgba(11, 15, 25, 0.85)';
+                    document.getElementById('projectBadgeBg').style.borderColor = '#1f2937';
+                    document.getElementById('active-project-tag').style.color = '#ffffff';
+                    document.getElementById('projectScreenBg').style.backgroundColor = '#050505';
+                    document.getElementById('projectFooter').style.backgroundColor = '#0b0f19';
+                    document.getElementById('projectFooter').style.borderColor = '#1f2937';
+                    document.getElementById('active-project-desc').style.color = '#d1d5db';
+                    document.getElementById('projectVisitLink').className = "text-xs text-teal-400 font-semibold uppercase tracking-wider hover:underline flex items-center gap-1 cursor-pointer";
+                    document.querySelectorAll('.project-thumb').forEach(thumb => {
+                        thumb.style.backgroundColor = '#0b0f19';
+                        thumb.querySelectorAll('.w-16').forEach(box => {
+                            box.style.backgroundColor = '#050505';
+                            box.style.borderColor = '#1f2937';
+                        });
+                    });
+                    document.querySelectorAll('.thumb-title').forEach(t => t.style.color = '#ffffff');
+                    document.querySelectorAll('.thumb-sub').forEach(s => s.style.color = '#9ca3af');
+
+                    document.getElementById('certificates').style.backgroundColor = '#000000';
+                    document.getElementById('certificates').style.borderColor = '#1f2937';
+                    document.getElementById('certHeading').style.color = '#ffffff';
+                    document.getElementById('certSub').style.color = '#9ca3af';
+                    document.querySelectorAll('.cert-card').forEach(card => {
+                        card.style.backgroundColor = '#0b0f19';
+                        card.style.borderColor = '#1f2937';
+                        card.querySelectorAll('.w-full.h-80').forEach(box => {
+                            box.style.backgroundColor = '#050505';
+                            box.style.borderColor = '#1f2937';
+                        });
+                    });
+                    document.querySelectorAll('.cert-title').forEach(t => t.style.color = '#ffffff');
+                    document.querySelectorAll('.cert-desc').forEach(d => d.style.color = '#9ca3af');
+
+                    themeToggleIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>`;
+                    themeToggleTooltip.textContent = "Dark Mode";
+                } else {
+                    // --- LIGHT MODE (Cream & Sky Blue Palette) ---
+                    pageBody.style.backgroundColor = '#FDFBF7';
+                    pageBody.style.color = '#3D2817';
+                    pageBody.classList.add('light-mode');
+                    
+                    if(profileImgDesktop) profileImgDesktop.src = 'images/light mode profile.png';
+                    if(profileImgMobile) profileImgMobile.src = 'images/light mode profile.png';
+
+                    // Pinapalitan ang mga litrato kapag Light Mode na
+                    if(serviceImg1) serviceImg1.src = 'images/W. WEB DEVELOPMENT.png';
+                    if(serviceImg2) serviceImg2.src = 'images/W. MANUAL TESTING.png';
+
+                    if(aboutImgBoxDesktop) {
+                        aboutImgBoxDesktop.style.backgroundColor = '#EBF3F9';
+                        aboutImgBoxDesktop.style.borderColor = '#6B4F33';
+                    }
+                    if(aboutImgBoxMobile) {
+                        aboutImgBoxMobile.style.backgroundColor = '#EBF3F9';
+                        aboutImgBoxMobile.style.borderColor = '#6B4F33';
+                    }
+
+                    navContainer.style.backgroundColor = '#EBF3F9';
+                    brandTitle.style.color = '#3D2817';
+                    bubbleCircle.style.backgroundColor = '#3D2817';
+                    bubbleCircle.style.borderColor = '#EBF3F9';
+                    activeLabel.style.color = '#4A3525';
+                    document.getElementById('activeIcon').style.stroke = '#FDFBF7';
+                    
+                    document.querySelectorAll('.nav-btn svg').forEach(svg => {
+                        svg.style.stroke = '#3D2817';
+                    });
+                    document.getElementById('themeToggleIcon').style.stroke = '#3D2817';
+
+                    homeSection.style.background = 'linear-gradient(to bottom, #EBF3F9 0%, #E4EDF4 55%, #F7F5F0 65%, #FDFBF7 100%)';
+                    if(homeBottomFade) homeBottomFade.className = "absolute bottom-0 left-0 w-full h-28 bg-gradient-to-t from-[#FDFBF7] to-transparent pointer-events-none z-25 transition-colors duration-400";
+                    typingTextWrapper.style.color = '#3D2817'; 
+                    homeDescription.style.color = '#6B4F33';
+                    if(viewProjectsBtn) {
+                        viewProjectsBtn.style.backgroundColor = '#EBF3F9';
+                        viewProjectsBtn.style.borderColor = '#6B4F33';
+                        viewProjectsBtn.style.color = '#3D2817';
+                    }
+
+                    document.getElementById('about').style.backgroundColor = '#FDFBF7';
+                    document.getElementById('about').style.borderColor = '#E4EDF4';
+                    document.getElementById('aboutTitle').style.color = '#3D2817';
+                    document.getElementById('aboutSubtitle').style.color = '#D97706';
+                    document.getElementById('aboutText').style.color = '#6B4F33';
+                    document.getElementById('aboutTitleMob').style.color = '#3D2817';
+                    document.getElementById('aboutSubtitleMob').style.color = '#D97706';
+                    document.getElementById('aboutTextMob').style.color = '#6B4F33';
+                    document.getElementById('sliderWrapper').style.backgroundColor = '#EBF3F9';
+                    document.getElementById('sliderWrapper').style.borderColor = '#E4EDF4';
+                    document.querySelectorAll('.slider-item').forEach(item => {
+                        item.classList.remove('text-gray-400');
+                        item.classList.add('text-[#3D2817]');
+                    });
+                    document.querySelectorAll('.social-icon-btn').forEach(btn => {
+                        btn.style.backgroundColor = '#F7F5F0';
+                        btn.style.borderColor = '#6B4F33';
+                        const iconEl = btn.querySelector('i');
+                        if (iconEl) iconEl.style.color = '#3D2817';
+                    });
+
+                    document.getElementById('services').style.backgroundColor = '#FDFBF7';
+                    document.getElementById('services').style.borderColor = '#E4EDF4';
+                    document.getElementById('servicesSub').style.color = '#D97706';
+                    document.getElementById('servicesHeading').style.color = '#3D2817';
+                    document.querySelectorAll('.service-card').forEach(card => {
+                        card.style.backgroundColor = '#EBF3F9';
+                        card.style.borderColor = '#6B4F33';
+                    });
+                    document.querySelectorAll('.service-card img').forEach(img => {
+                        img.parentElement.style.backgroundColor = '#E4EDF4';
+                    });
+                    document.querySelectorAll('.service-title').forEach(t => t.style.color = '#3D2817');
+                    document.querySelectorAll('.service-desc').forEach(d => d.style.color = '#6B4F33');
+
+                    document.getElementById('projects').style.backgroundColor = '#FDFBF7';
+                    document.getElementById('projects').style.borderColor = '#E4EDF4';
+                    document.getElementById('projectsSub').style.color = '#D97706';
+                    document.getElementById('projectsHeading').style.color = '#3D2817';
+                    document.getElementById('projectMainBox').style.backgroundColor = '#EBF3F9';
+                    document.getElementById('projectMainBox').style.borderColor = '#6B4F33';
+                    document.getElementById('projectBadgeBg').style.backgroundColor = 'rgba(253, 251, 247, 0.85)';
+                    document.getElementById('projectBadgeBg').style.borderColor = '#6B4F33';
+                    document.getElementById('active-project-tag').style.color = '#3D2817';
+                    document.getElementById('projectScreenBg').style.backgroundColor = '#E4EDF4';
+                    document.getElementById('projectFooter').style.backgroundColor = '#E4EDF4';
+                    document.getElementById('projectFooter').style.borderColor = '#6B4F33';
+                    document.getElementById('active-project-desc').style.color = '#3D2817';
+                    document.getElementById('projectVisitLink').className = "text-xs text-[#D97706] font-semibold uppercase tracking-wider hover:underline flex items-center gap-1 cursor-pointer";
+                    document.querySelectorAll('.project-thumb').forEach(thumb => {
+                        thumb.style.backgroundColor = '#EBF3F9';
+                        thumb.querySelectorAll('.w-16').forEach(box => {
+                            box.style.backgroundColor = '#E4EDF4';
+                            box.style.borderColor = '#6B4F33';
+                        });
+                    });
+                    document.querySelectorAll('.thumb-title').forEach(t => t.style.color = '#3D2817');
+                    document.querySelectorAll('.thumb-sub').forEach(s => s.style.color = '#6B4F33');
+
+                    document.getElementById('certificates').style.backgroundColor = '#FDFBF7';
+                    document.getElementById('certificates').style.borderColor = '#E4EDF4';
+                    document.getElementById('certHeading').style.color = '#3D2817';
+                    document.getElementById('certSub').style.color = '#6B4F33';
+                    document.querySelectorAll('.cert-card').forEach(card => {
+                        card.style.backgroundColor = '#EBF3F9';
+                        card.style.borderColor = '#6B4F33';
+                        card.querySelectorAll('.w-full.h-80').forEach(box => {
+                            box.style.backgroundColor = '#E4EDF4';
+                            box.style.borderColor = '#6B4F33';
+                        });
+                    });
+                    document.querySelectorAll('.cert-title').forEach(t => t.style.color = '#3D2817');
+                    document.querySelectorAll('.cert-desc').forEach(d => d.style.color = '#6B4F33');
+
+                    themeToggleIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>`;
+                    themeToggleTooltip.textContent = "Light Mode";
+                }
+
+                themeToggleIcon.classList.remove('fading');
+            }, 250);
+
+            const buttons = document.querySelectorAll('.nav-btn');
+            setActive(activeIndex, buttons[activeIndex].querySelector('span').textContent, buttons[activeIndex], false);
+        }
+
+        // Typing Effect
+        const words = ["WEB DEVELOPER", "MANUAL TESTER"];
+        let i = 0;
+
+        function typingEffect() {
+            let word = words[i].split("");
+            let loopTyping = function() {
+                if (word.length > 0) {
+                    const textEl = document.getElementById('typing-text');
+                    if(textEl) textEl.innerHTML += word.shift();
+                } else {
+                    setTimeout(deletingEffect, 2000);
+                    return;
+                }
+                setTimeout(loopTyping, 100);
+            };
+            loopTyping();
+        }
+
+        function deletingEffect() {
+            let word = words[i].split("");
+            let loopDeleting = function() {
+                if (word.length > 0) {
+                    word.pop();
+                    const textEl = document.getElementById('typing-text');
+                    if(textEl) textEl.innerHTML = word.join("");
+                } else {
+                    i = (words.length > (i + 1)) ? i + 1 : 0;
+                    setTimeout(typingEffect, 500);
+                    return;
+                }
+                setTimeout(loopDeleting, 50);
+            };
+            loopDeleting();
+        }
+        typingEffect();
+
+        // 3D Robot Animation Setup
+        const robotContainer = document.getElementById('robot-canvas-container');
+        const robotScene = new THREE.Scene();
+
+        const robotCamera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
+        robotCamera.position.set(0, -0.4, 6);
+
+        const robotRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        robotRenderer.setSize(window.innerWidth, window.innerHeight);
+        robotRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        robotRenderer.shadowMap.enabled = true;
+        robotRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        robotContainer.appendChild(robotRenderer.domElement);
+
+        const ambientLightRobot = new THREE.AmbientLight(0xffffff, 0.75);
+        robotScene.add(ambientLightRobot);
+
+        const mouse = { x: 0, y: 0, normalizedX: 0, normalizedY: 0 };
+        window.addEventListener('mousemove', (event) => {
+            mouse.normalizedX = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.normalizedY = -(event.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        function generatePbrTextures() {
+            const size = 512;
+            const canvasC = document.createElement('canvas');
+            const canvasB = document.createElement('canvas');
+            canvasC.width = canvasB.width = size;
+            canvasC.height = canvasB.height = size;
+            const ctxC = canvasC.getContext('2d');
+            const ctxB = canvasB.getContext('2d');
+
+            ctxC.fillStyle = "#dcdcdc";
+            ctxC.fillRect(0, 0, size, size);
+            ctxB.fillStyle = "#808080";
+            ctxB.fillRect(0, 0, size, size);
+
+            for (let i = 0; i < 10000; i++) {
+                const x = Math.random() * size;
+                const y = Math.random() * size;
+                const r = 0.5 + Math.random() * 1.5;
+                const isDark = Math.random() > 0.15;
+
+                ctxC.beginPath();
+                ctxC.arc(x, y, r, 0, Math.PI * 2);
+                ctxC.fillStyle = isDark ? "#222222" : "#dddddd";
+                ctxC.fill();
+
+                ctxB.beginPath();
+                ctxB.arc(x, y, r, 0, Math.PI * 2);
+                ctxB.fillStyle = isDark ? "#000000" : "#ffffff";
+                ctxB.fill();
+            }
+
+            const texC = new THREE.CanvasTexture(canvasC);
+            const texB = new THREE.CanvasTexture(canvasB);
+            texC.wrapS = texB.wrapS = THREE.RepeatWrapping;
+            texC.wrapT = texB.wrapT = THREE.RepeatWrapping;
+            texC.repeat.set(6, 3);
+            texB.repeat.set(6, 3);
+
+            return { colorMap: texC, bumpMap: texB };
+        }
+
+        const textures = generatePbrTextures();
+        const chasisMaterial = new THREE.MeshStandardMaterial({
+            color: "#c4c4c4",
+            map: textures.colorMap,
+            bumpMap: textures.bumpMap,
+            bumpScale: 0.005,
+            roughness: 1.0,
+            metalness: 0.0
+        });
+
+        const robotGroup = new THREE.Group();
+        robotGroup.position.set(0, -1.2, 0);
+        robotScene.add(robotGroup);
+
+        const bodyGeometry = new THREE.SphereGeometry(0.43, 64, 64, 0, Math.PI * 2, Math.PI * 0.15, Math.PI * 0.85);
+        const bodyMesh = new THREE.Mesh(bodyGeometry, chasisMaterial);
+        bodyMesh.castShadow = true;
+        bodyMesh.receiveShadow = true;
+        robotGroup.add(bodyMesh);
+
+        const bevelGeo = new THREE.TorusGeometry(0.235, 0.025, 32, 64);
+        const bevelMesh = new THREE.Mesh(bevelGeo, chasisMaterial);
+        bevelMesh.position.set(0, 0.34, 0);
+        bevelMesh.rotation.x = Math.PI / 2;
+        robotGroup.add(bevelMesh);
+
+        const neckPoints = [
+            -0.05, 0.215, 0.02, 0.28, 0.045, 0.295, 0.055, 0.27, 0.055, 0.1, -0.05, 0.1
+        ].reduce((acc, val, i, arr) => {
+            if (i % 2 === 0) acc.push(new THREE.Vector2(arr[i+1], arr[i]));
+            return acc;
+        }, []);
+
+        const neckGeo = new THREE.LatheGeometry(neckPoints, 64);
+        const neckMesh = new THREE.Mesh(neckGeo, chasisMaterial);
+        robotGroup.add(neckMesh);
+
+        const headGroup = new THREE.Group();
+        headGroup.position.set(0, 0.6, 0);
+        robotGroup.add(headGroup);
+
+        const headMat = new THREE.MeshStandardMaterial({ color: "#111111", roughness: 1.0 });
+        const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.28, 64, 64, 0, Math.PI * 2, 0, Math.PI), headMat);
+        headGroup.add(headMesh);
+
+        const glassMat = new THREE.ShaderMaterial({
+            uniforms: {
+                color: { value: new THREE.Color("#00ffc6") },
+                power: { value: 3.8 },
+                intensity: { value: 1.2 }
+            },
+            vertexShader: `
+                varying vec3 vNormal;
+                varying vec3 vViewPosition;
+                void main() {
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    vViewPosition = -mvPosition.xyz;
+                    vNormal = normalize(normalMatrix * normal);
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            `,
+            fragmentShader: `
+                uniform vec3 color;
+                uniform float power;
+                uniform float intensity;
+                varying vec3 vNormal;
+                varying vec3 vViewPosition;
+                void main() {
+                    vec3 normal = normalize(vNormal);
+                    vec3 viewDir = normalize(vViewPosition);
+                    float fresnel = 1.0 - max(dot(viewDir, normal), 0.0);
+                    fresnel = pow(fresnel, power);
+                    gl_FragColor = vec4(color, fresnel * intensity);
+                }
+            `,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+
+        const glassMesh = new THREE.Mesh(new THREE.SphereGeometry(0.3, 64, 64, 0, Math.PI * 2, 0, Math.PI), glassMat);
+        headGroup.add(glassMesh);
+
+        const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const leftEye = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.075, 0.01), eyeMat);
+        leftEye.position.set(-0.075, 0.0, 0.28);
+        headGroup.add(leftEye);
+
+        const rightEye = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.075, 0.01), eyeMat);
+        rightEye.position.set(0.075, 0.0, 0.28);
+        headGroup.add(rightEye);
+
+        function createEar(isLeft) {
+            const earGroup = new THREE.Group();
+            const dir = isLeft ? -1 : 1;
+            earGroup.position.set(dir * 0.31, 0.02, 0);
+
+            const baseMat = new THREE.MeshStandardMaterial({ color: "#e0e0e0", roughness: 0.4 });
+            const base = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.06, 32), baseMat);
+            base.rotation.z = (Math.PI / 2) * dir;
+            earGroup.add(base);
+
+            const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.12, 16), baseMat);
+            stick.position.set(dir * 0.06, 0, 0);
+            earGroup.add(stick);
+
+            const tipMat = new THREE.MeshBasicMaterial({ color: 0x00ffc6 });
+            const tip = new THREE.Mesh(new THREE.SphereGeometry(0.025, 16, 16), tipMat);
+            tip.position.set(dir * 0.13, 0, 0);
+            earGroup.add(tip);
+
+            return earGroup;
+        }
+
+        headGroup.add(createEar(true));
+        headGroup.add(createEar(false));
+
+        const clock = new THREE.Clock();
+        let blinkTimer = 0;
+        let isBlinking = false;
+        let blinkDuration = 0;
+
+        function animateRobot() {
+            requestAnimationFrame(animateRobot);
+            const delta = clock.getDelta();
+
+            blinkTimer += delta;
+            if (!isBlinking && blinkTimer > Math.random() * 3 + 2) {
+                isBlinking = true;
+                blinkDuration = 0;
+            }
+
+            if (isBlinking) {
+                blinkDuration += delta;
+                leftEye.scale.y = 0.1;
+                rightEye.scale.y = 0.1;
+                if (blinkDuration > 0.15) {
+                    isBlinking = false;
+                    blinkTimer = 0;
+                }
+            } else {
+                leftEye.scale.y = THREE.MathUtils.lerp(leftEye.scale.y, 1, 15 * delta);
+                rightEye.scale.y = THREE.MathUtils.lerp(rightEye.scale.y, 1, 15 * delta);
+            }
+
+            const targetPosX = mouse.normalizedX * 1.0;
+            robotGroup.position.x = THREE.MathUtils.lerp(robotGroup.position.x, targetPosX, 3.5 * delta);
+            const relativeX = mouse.normalizedX - robotGroup.position.x;
+
+            robotGroup.rotation.y = THREE.MathUtils.lerp(robotGroup.rotation.y, -relativeX * 0.95, 10.0 * delta);
+            robotGroup.rotation.x = THREE.MathUtils.lerp(robotGroup.rotation.x, -mouse.normalizedY * 0.25, 10.0 * delta);
+            robotGroup.rotation.z = THREE.MathUtils.lerp(robotGroup.rotation.z, -relativeX * 0.15, 10.0 * delta);
+
+            headGroup.rotation.y = THREE.MathUtils.lerp(headGroup.rotation.y, relativeX * 1.8, 15.0 * delta);
+            headGroup.rotation.x = THREE.MathUtils.lerp(headGroup.rotation.x, -mouse.normalizedY * 0.3, 15.0 * delta);
+
+            robotRenderer.render(robotScene, robotCamera);
+        }
+        animateRobot();
+
+        // 3D Campus Animation Setup
+        const viewport = document.getElementById('canvas-viewport');
+        if (viewport) {
+            const scene = new THREE.Scene();
+            let wWidth = viewport.clientWidth || 400;
+            let wHeight = viewport.clientHeight || 400;
+            let aspect = wWidth / wHeight;
+            const d = 15.5; 
+            
+            const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 1000);
+            camera.position.set(26, 20, 26);
+            camera.lookAt(0, 1.0, -1.0);
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setSize(wWidth, wHeight);
+            viewport.appendChild(renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); scene.add(ambientLight);
+            const sunLight = new THREE.DirectionalLight(0xfffbeb, 1.1); sunLight.position.set(30, 45, 20); scene.add(sunLight);
+
+            const matBase = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8 }); 
+            const matMaroon = new THREE.MeshStandardMaterial({ color: 0x4c0519, roughness: 0.35, metalness: 0.1 }); 
+            const matDarkSlate = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 }); 
+            const matBlueAccent = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.2 }); 
+            const matGlass = new THREE.MeshStandardMaterial({ color: 0xbae6fd, metalness: 0.8, roughness: 0.05, transparent: true, opacity: 0.85 }); 
+            const matSurroundingWalls = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.5 }); 
+            const matDarkWindowBox = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2 }); 
+            const matTrunk = new THREE.MeshStandardMaterial({ color: 0x292524 });
+            const matLeaves = new THREE.MeshStandardMaterial({ color: 0x047857, roughness: 0.7 }); 
+            const matTrackRed = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.6 }); 
+            const matCourtBlue = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.5 }); 
+            const matCourtGreen = new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.5 }); 
+            const matWhiteLine = new THREE.MeshBasicMaterial({ color: 0xf8fafc }); 
+            const matAsphalt = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }); 
+            const matGateMetal = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.7, roughness: 0.2 });
+            const matSkin = new THREE.MeshStandardMaterial({ color: 0xfbcfe8, roughness: 0.6 });
+
+            const campusGroup = new THREE.Group();
+            scene.add(campusGroup);
+
+            function createTextTexture() {
+                const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 128;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#1d4ed8'; ctx.fillRect(0, 0, canvas.width, canvas.height); 
+                ctx.fillStyle = '#ffffff'; ctx.font = 'bold 58px "Segoe UI", Arial';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText('DATAMEX', canvas.width / 2, canvas.height / 2);
+                const texture = new THREE.CanvasTexture(canvas); return new THREE.MeshBasicMaterial({ map: texture });
+            }
+            const matSignageText = createTextTexture();
+
+            const boardY = 0.8;
+            const meshBase = new THREE.Mesh(new THREE.BoxGeometry(26, 0.4, 26), matBase);
+            const leftWing = new THREE.Mesh(new THREE.BoxGeometry(5.2, 4.8, 4.5), matMaroon); leftWing.position.set(-5.2, 2.6 + boardY, -7.5);
+            const rightWing = leftWing.clone(); rightWing.position.x = 5.2;
+
+            const geoWin = new THREE.BoxGeometry(1.4, 0.8, 0.15); const windows = [];
+            const winXPositions = [-6.6, -4.2, 4.2, 6.6]; const winYPositions = [1.2 + boardY, 2.5 + boardY, 3.8 + boardY];
+            winXPositions.forEach(x => { winYPositions.forEach(y => { const w = new THREE.Mesh(geoWin, matGlass); w.position.set(x, y, -5.2); windows.push(w); }); });
+
+            const leftCPillar = new THREE.Mesh(new THREE.BoxGeometry(0.8, 5.2, 4.8), matDarkSlate); leftCPillar.position.set(-1.8, 2.8 + boardY, -7.2);
+            const rightCPillar = leftCPillar.clone(); rightCPillar.position.x = 1.8;
+            const centerHeader = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.8, 4.8), matBlueAccent); centerHeader.position.set(0, 5.8 + boardY, -7.2);
+            const entranceCanopy = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.1, 1.2), matDarkSlate); entranceCanopy.position.set(0, 3.2 + boardY, -4.5);
+            const topCenter = new THREE.Mesh(new THREE.BoxGeometry(3.6, 1.6, 4.2), matMaroon); topCenter.position.set(0, 7.0 + boardY, -7.4);
+            const topGlass = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.0, 0.2), matGlass); topGlass.position.set(0, 7.0 + boardY, -5.2);
+            const signMesh = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.65, 0.15), matSignageText); signMesh.position.set(0, 5.8 + boardY, -4.7);
+
+            const sideBuildingL = new THREE.Mesh(new THREE.BoxGeometry(3.6, 5.8, 6.2), matSurroundingWalls); sideBuildingL.position.set(-9.4, 3.1 + boardY, -4.0);
+            const sideBuildingR = new THREE.Mesh(new THREE.BoxGeometry(3.6, 5.8, 6.2), matSurroundingWalls); sideBuildingR.position.set(9.4, 3.1 + boardY, -4.0);
+            const backResearchLab = new THREE.Mesh(new THREE.BoxGeometry(12.2, 3.4, 3.2), matSurroundingWalls); backResearchLab.position.set(0, 1.9 + boardY, -11.3);
+
+            const grayWindows = []; const sideWinGeo = new THREE.BoxGeometry(0.15, 0.7, 0.9);
+            for(let y = 1.6 + boardY; y <= 4.8 + boardY; y += 1.3) {
+                for(let z = -5.5; z <= -2.5; z += 1.5) {
+                    const wL = new THREE.Mesh(sideWinGeo, matDarkWindowBox); wL.position.set(-9.4 + 1.81, y, z); grayWindows.push(wL);
+                    const wR = new THREE.Mesh(sideWinGeo, matDarkWindowBox); wR.position.set(9.4 - 1.81, y, z); grayWindows.push(wR);
+                }
+            }
+
+            const sportsComplexGroup = new THREE.Group();
+            const runningTrackBase = new THREE.Mesh(new THREE.BoxGeometry(14.0, 0.05, 8.5), matTrackRed); runningTrackBase.position.set(-2.5, 0.43 + boardY, 1.5); sportsComplexGroup.add(runningTrackBase);
+            const bbCourtFloor = new THREE.Mesh(new THREE.BoxGeometry(9.5, 0.06, 5.5), matCourtBlue); bbCourtFloor.position.set(-2.5, 0.435 + boardY, 1.5); sportsComplexGroup.add(bbCourtFloor);
+            const bbInnerGreen = new THREE.Mesh(new THREE.BoxGeometry(8.5, 0.07, 4.5), matCourtGreen); bbInnerGreen.position.set(-2.5, 0.438 + boardY, 1.5); sportsComplexGroup.add(bbInnerGreen);
+            const trackLine1 = new THREE.Mesh(new THREE.BoxGeometry(13.5, 0.08, 0.06), matWhiteLine); trackLine1.position.set(-2.5, 0.44 + boardY, 5.5); sportsComplexGroup.add(trackLine1);
+            const centerRing = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.08, 24, 1, true), matWhiteLine); centerRing.position.set(-2.5, 0.442 + boardY, 1.5); sportsComplexGroup.add(centerRing);
+
+            function createBasketballHoop(xPos) {
+                const hoopGroup = new THREE.Group();
+                const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.8), matGateMetal); pole.position.y = 0.9; hoopGroup.add(pole);
+                const board = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.5, 0.8), matWhiteLine); board.position.set(xPos > -2.5 ? -0.1 : 0.1, 1.6, 0); hoopGroup.add(board);
+                const rim = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.02, 8, 16), matTrackRed); rim.rotation.x = Math.PI/2; rim.position.set(xPos > -2.5 ? -0.25 : 0.25, 1.4, 0); hoopGroup.add(rim);
+                hoopGroup.position.set(xPos, 0.44 + boardY, 1.5); return hoopGroup;
+            }
+            sportsComplexGroup.add(createBasketballHoop(-6.8), createBasketballHoop(1.8));
+
+            const parkingGroup = new THREE.Group();
+            const asphaltFloor = new THREE.Mesh(new THREE.BoxGeometry(22.0, 0.05, 5.0), matAsphalt); asphaltFloor.position.set(0, 0.43 + boardY, 9.5); parkingGroup.add(asphaltFloor);
+            for(let i = -4; i <= 4; i++) { const line = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.07, 3.2), matWhiteLine); line.position.set(i * 2.2, 0.44 + boardY, 9.5); parkingGroup.add(line); }
+            
+            const carsGroup = new THREE.Group(); const carColors = [0x991b1b, 0x0369a1, 0xb45309, 0x059669];
+            for(let i = -3; i <= 3; i++) {
+                if(i === 0) continue; 
+                const car = new THREE.Group();
+                const carBase = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.45, 2.0), new THREE.MeshStandardMaterial({ color: carColors[Math.abs(i) % carColors.length], metalness: 0.5, roughness: 0.2 })); carBase.position.y = 0.22;
+                const carTop = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.28, 1.1), matGlass); carTop.position.set(0, 0.55, -0.05);
+                car.add(carBase, carTop); car.position.set(i * 2.2, 0.45 + boardY, 9.5); carsGroup.add(car);
+            }
+
+            const gateGroup = new THREE.Group();
+            const leftPost = new THREE.Mesh(new THREE.BoxGeometry(0.6, 3.0, 0.6), matGateMetal); leftPost.position.set(-4.5, 1.9 + boardY, 6.5);
+            const rightPost = leftPost.clone(); rightPost.position.x = 4.5;
+            const gateRoofArch = new THREE.Mesh(new THREE.BoxGeometry(9.6, 0.4, 1.0), matDarkSlate); gateRoofArch.position.set(0, 3.5 + boardY, 6.5); 
+            const barL = new THREE.Mesh(new THREE.BoxGeometry(4.3, 0.16, 0.08), matBlueAccent); barL.position.set(-2.15, 1.6 + boardY, 6.5); const barR = barL.clone(); barR.position.x = 2.15; 
+            gateGroup.add(leftPost, rightPost, gateRoofArch, barL, barR);
+
+            const studentsGroup = new THREE.Group(); const shirtColors = [0xdb2777, 0x0d9488, 0xea580c];
+            [[-1.5, -0.5], [1.0, -1.0], [3.5, 3.5], [-1.0, 3.5]].forEach((pos, idx) => {
+                const student = new THREE.Group(); const shirtMat = new THREE.MeshStandardMaterial({ color: shirtColors[idx % shirtColors.length] });
+                const legs = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.36, 0.18), matDarkSlate); legs.position.y = 0.18;
+                const torso = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.42, 0.2), shirtMat); torso.position.y = 0.57;
+                const head = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 0.18), matSkin); head.position.y = 0.87;
+                student.add(legs, torso, head); student.position.set(pos[0], 0.4 + boardY, pos[1]); studentsGroup.add(student);
+            });
+
+            const trees = [];
+            [[-11.5,3], [11.5,3], [-9,-10], [9,-10]].forEach(pos => {
+                const tGroup = new THREE.Group();
+                const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 1.4, 6), matTrunk); trunk.position.y = 0.7;
+                const leaves = new THREE.Mesh(new THREE.DodecahedronGeometry(0.85, 1), matLeaves); leaves.position.y = 1.6;
+                tGroup.add(trunk, leaves); tGroup.position.set(pos[0], 0.4 + boardY, pos[1]); trees.push(tGroup);
+            });
+
+            const tl = gsap.timeline({ repeat: -1 });
+            tl.to({}, { duration: 0.1, onStart: () => {
+                campusGroup.clear(); campusGroup.rotation.y = 0; 
+                meshBase.position.y = -6; meshBase.scale.set(0.01, 1, 0.01); campusGroup.add(meshBase); 
+                gsap.to(meshBase.position, { y: boardY, duration: 1.2, ease: "power3.out" });
+                gsap.to(meshBase.scale, { x: 1, z: 1, duration: 1.2, ease: "power3.out" });
+                gsap.to(campusGroup.rotation, { y: 1.2, duration: 3.5, ease: "power1.inOut" });
+            }});
+
+            tl.to({}, { duration: 1.2, onStart: () => {
+                sideBuildingL.scale.y = sideBuildingR.scale.y = backResearchLab.scale.y = 0.01;
+                sideBuildingL.position.y = sideBuildingR.position.y = backResearchLab.position.y = 0.2 + boardY;
+                campusGroup.add(sideBuildingL, sideBuildingR, backResearchLab);
+                gsap.to([sideBuildingL.scale, sideBuildingR.scale, backResearchLab.scale], { y: 1, duration: 1.2, ease: "power2.out" });
+                gsap.to([sideBuildingL.position, sideBuildingR.position], { y: 3.1 + boardY, duration: 1.2, ease: "power2.out" });
+                gsap.to(backResearchLab.position, { y: 1.9 + boardY, duration: 1.2, ease: "power2.out" });
+                grayWindows.forEach(w => { w.scale.set(0,0,0); campusGroup.add(w); gsap.to(w.scale, { x: 1, y: 1, z: 1, duration: 0.4, delay: 0.4 }); });
+            }}, "+=1.0");
+
+            tl.to({}, { duration: 1.2, onStart: () => {
+                leftWing.scale.y = rightWing.scale.y = 0.01; leftWing.position.y = rightWing.position.y = 0.2 + boardY; campusGroup.add(leftWing, rightWing); 
+                gsap.to([leftWing.scale, rightWing.scale], { y: 1, duration: 1.2, ease: "power4.out" });
+                gsap.to([leftWing.position, rightWing.position], { y: 2.6 + boardY, duration: 1.2, ease: "power4.out" });
+            }}, "+=1.0");
+
+            tl.to({}, { duration: 0.8, onStart: () => { windows.forEach(w => { w.scale.set(0,0,0); campusGroup.add(w); gsap.to(w.scale, { x:1, y:1, z:1, duration: 0.4 }); }); }}, "+=0.6");
+
+            tl.to({}, { duration: 1.4, onStart: () => {
+                leftCPillar.position.y = rightCPillar.position.y = -5; centerHeader.scale.x = topCenter.position.y = 15;
+                topGlass.scale.set(0,0,0); signMesh.scale.set(0,0,0); entranceCanopy.scale.set(0,1,0);
+                campusGroup.add(leftCPillar, rightCPillar, centerHeader, topCenter, topGlass, signMesh, entranceCanopy);
+                gsap.to([leftCPillar.position, rightCPillar.position], { y: 2.8 + boardY, duration: 0.8 });
+                gsap.to(centerHeader.scale, { x: 1, duration: 0.8 });
+                gsap.to(entranceCanopy.scale, { x: 1, z: 1, duration: 0.5, delay: 0.3 });
+                gsap.to(topCenter.position, { y: 7.0 + boardY, duration: 0.9, ease: "bounce.out" });
+                gsap.to([topGlass.scale, signMesh.scale], { x: 1, y: 1, z: 1, duration: 0.4, delay: 0.5 });
+            }}, "+=0.8");
+
+            tl.to({}, { duration: 1.2, onStart: () => {
+                runningTrackBase.scale.set(0,1,0); bbCourtFloor.scale.set(0,1,0); bbInnerGreen.scale.set(0,1,0); 
+                campusGroup.add(sportsComplexGroup); 
+                gsap.to([runningTrackBase.scale, bbCourtFloor.scale, bbInnerGreen.scale], { x: 1, z: 1, duration: 0.9, ease: "power2.out" });
+                gsap.to(campusGroup.rotation, { y: 0.05, duration: 3.5, ease: "power2.out" });
+            }}, "+=0.8");
+
+            tl.to({}, { duration: 1.2, onStart: () => {
+                asphaltFloor.scale.set(0,1,0); campusGroup.add(parkingGroup); gsap.to(asphaltFloor.scale, { x: 1, z: 1, duration: 0.7 });
+                campusGroup.add(carsGroup); carsGroup.children.forEach((c, idx) => { const ty = c.position.y; c.position.y = 8; gsap.to(c.position, { y: ty, duration: 0.6, delay: idx * 0.08, ease: "bounce.out" }); });
+                campusGroup.add(studentsGroup); studentsGroup.children.forEach((s, idx) => { s.scale.set(0,0,0); gsap.to(s.scale, { x: 1, y: 1, z: 1, duration: 0.5, delay: idx * 0.05, ease: "back.out(1.5)" }); });
+            }}, "+=0.5");
+
+            tl.to({}, { duration: 1.2, onStart: () => {
+                leftPost.position.y = rightPost.position.y = -3; gateRoofArch.scale.set(0,1,0); barL.scale.x = barR.scale.x = 0; campusGroup.add(gateGroup); 
+                gsap.to([leftPost.position, rightPost.position], { y: 1.9 + boardY, duration: 0.6 });
+                gsap.to(gateRoofArch.scale, { x: 1, z: 1, duration: 0.5, delay: 0.3 });
+                gsap.to([barL.scale, barR.scale], { x: 1, duration: 0.5, delay: 0.4 });
+                trees.forEach(t => { t.scale.set(0,0,0); campusGroup.add(t); gsap.to(t.scale, { x:1, y:1, z:1, duration: 0.6, ease: "elastic.out(1, 0.75)" }); });
+            }}, "+=0.5");
+
+            tl.to({}, { duration: 8.5 });
+
+            function animateCampus() {
+                requestAnimationFrame(animateCampus);
+                renderer.render(scene, camera);
+            }
+            animateCampus();
+
+            window.addEventListener('resize', () => {
+                wWidth = viewport.clientWidth; wHeight = viewport.clientHeight;
+                renderer.setSize(wWidth, wHeight);
+                aspect = wWidth / wHeight;
+                camera.left = -d * aspect; camera.right = d * aspect;
+                camera.updateProjectionMatrix();
+            });
+        }
+
+        const projectData = {
+            1: { tag: "", desc: "Interactive 3D Architectural Showcase & System Preview", url: "Urrutia - School page - Copy/index.html" },
+            2: { tag: "", desc: "Project Two Detailed UI & Functional Overview", url: "DENTAL CLINIC WEBSITE/HOME.HTML" },
+            3: { tag: "", desc: "Project Four System Design & Deployment Result", url: "https://stackoverflow.com" }
+        };
+
+        let currentActiveProject = 1;
+
+        function openMainWebsite() {
+            let targetUrl = projectData[currentActiveProject].url;
+            if(targetUrl && targetUrl !== "#") {
+                window.open(targetUrl, '_blank');
+            }
+        }
+
+        function switchProject(projectNum) {
+            currentActiveProject = projectNum;
+
+            for (let j = 1; j <= 3; j++) {
+                let slide = document.getElementById(`slide-${j}`);
+                if (slide) {
+                    if (j === projectNum) {
+                        slide.classList.remove('opacity-0', 'pointer-events-none', 'z-0');
+                        slide.classList.add('opacity-100', 'z-10');
+                    } else {
+                        slide.classList.remove('opacity-100', 'z-10');
+                        slide.classList.add('opacity-0', 'pointer-events-none', 'z-0');
+                    }
+                }
+            }
+
+            let tagEl = document.getElementById('active-project-tag');
+            let descEl = document.getElementById('active-project-desc');
+            if(tagEl) tagEl.innerText = projectData[projectNum].tag;
+            if(descEl) descEl.innerText = projectData[projectNum].desc;
+
+            let container = document.getElementById('rotating-thumbnails');
+            if(container) {
+                let prevNum = projectNum <= 1 ? 3 : projectNum - 1;
+                let nextNum = projectNum >= 3 ? 1 : projectNum + 1;
+                let orderedIndices = [prevNum, projectNum, nextNum];
+
+                for (let idx = 0; idx < 3; idx++) {
+                    let pId = orderedIndices[idx];
+                    let cardElement = document.getElementById(`thumb-${pId}`);
+                    if(cardElement) {
+                        container.appendChild(cardElement);
+                        if (idx === 1) {
+                            cardElement.classList.remove('border-[#6B4F33]', 'opacity-40');
+                            cardElement.classList.add('border-[#D97706]', 'opacity-100');
+                        } else {
+                            cardElement.classList.remove('border-[#D97706]');
+                            cardElement.classList.add('border-[#6B4F33]', 'opacity-40');
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

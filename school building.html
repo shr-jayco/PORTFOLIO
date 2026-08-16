@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datamex Valenzuela Campus</title>
+    <style>
+        /* Kailangan nito para magkaroon ng sukat ang viewport sa screen */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0f172a;
+            overflow: hidden;
+        }
+        .split-left-3d {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        .live-label-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #ffffff;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-weight: bold;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            z-index: 10;
+        }
+        #canvas-viewport {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="split-left-3d">
+  <div class="live-label-overlay" id="live-campus-status">VALENZUELA CAMPUS</div>
+  <div id="canvas-viewport"></div>
+</div>
+
+<!-- Three.js at GSAP Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+<script>
+    const viewport = document.getElementById('canvas-viewport');
+    const scene = new THREE.Scene();
+
+    let wWidth = viewport.clientWidth;
+    let wHeight = viewport.clientHeight;
+    let aspect = wWidth / wHeight;
+    const d = 15.5; 
+    
+    const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 1000);
+    camera.position.set(26, 20, 26);
+    camera.lookAt(0, 1.0, -1.0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(wWidth, wHeight);
+    viewport.appendChild(renderer.domElement);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); scene.add(ambientLight);
+    const sunLight = new THREE.DirectionalLight(0xfffbeb, 1.1); sunLight.position.set(30, 45, 20); scene.add(sunLight);
+
+    // SYSTEM SOLID MATERIAL SHADERS
+    const matBase = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8 }); 
+    const matMaroon = new THREE.MeshStandardMaterial({ color: 0x4c0519, roughness: 0.35, metalness: 0.1 }); 
+    const matDarkSlate = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 }); 
+    const matBlueAccent = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.2 }); 
+    const matGlass = new THREE.MeshStandardMaterial({ color: 0xbae6fd, metalness: 0.8, roughness: 0.05, transparent: true, opacity: 0.85 }); 
+    const matSurroundingWalls = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.5 }); 
+    const matDarkWindowBox = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2 }); 
+    const matTrunk = new THREE.MeshStandardMaterial({ color: 0x292524 });
+    const matLeaves = new THREE.MeshStandardMaterial({ color: 0x047857, roughness: 0.7 }); 
+    const matTrackRed = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.6 }); 
+    const matCourtBlue = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.5 }); 
+    const matCourtGreen = new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.5 }); 
+    const matWhiteLine = new THREE.MeshBasicMaterial({ color: 0xf8fafc }); 
+    const matAsphalt = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }); 
+    const matGateMetal = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.7, roughness: 0.2 });
+    const matSkin = new THREE.MeshStandardMaterial({ color: 0xfbcfe8, roughness: 0.6 });
+
+    const campusGroup = new THREE.Group();
+    scene.add(campusGroup);
+
+    function createTextTexture() {
+        const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 128;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#1d4ed8'; ctx.fillRect(0, 0, canvas.width, canvas.height); 
+        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 58px "Segoe UI", Arial';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('DATAMEX', canvas.width / 2, canvas.height / 2);
+        const texture = new THREE.CanvasTexture(canvas); return new THREE.MeshBasicMaterial({ map: texture });
+    }
+    const matSignageText = createTextTexture();
+
+    const boardY = 0.8;
+    const meshBase = new THREE.Mesh(new THREE.BoxGeometry(26, 0.4, 26), matBase);
+
+    const leftWing = new THREE.Mesh(new THREE.BoxGeometry(5.2, 4.8, 4.5), matMaroon); leftWing.position.set(-5.2, 2.6 + boardY, -7.5);
+    const rightWing = leftWing.clone(); rightWing.position.x = 5.2;
+
+    const geoWin = new THREE.BoxGeometry(1.4, 0.8, 0.15); const windows = [];
+    const winXPositions = [-6.6, -4.2, 4.2, 6.6]; const winYPositions = [1.2 + boardY, 2.5 + boardY, 3.8 + boardY];
+    winXPositions.forEach(x => { winYPositions.forEach(y => { const w = new THREE.Mesh(geoWin, matGlass); w.position.set(x, y, -5.2); windows.push(w); }); });
+
+    const leftCPillar = new THREE.Mesh(new THREE.BoxGeometry(0.8, 5.2, 4.8), matDarkSlate); leftCPillar.position.set(-1.8, 2.8 + boardY, -7.2);
+    const rightCPillar = leftCPillar.clone(); rightCPillar.position.x = 1.8;
+    const centerHeader = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.8, 4.8), matBlueAccent); centerHeader.position.set(0, 5.8 + boardY, -7.2);
+    const entranceCanopy = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.1, 1.2), matDarkSlate); entranceCanopy.position.set(0, 3.2 + boardY, -4.5);
+    const topCenter = new THREE.Mesh(new THREE.BoxGeometry(3.6, 1.6, 4.2), matMaroon); topCenter.position.set(0, 7.0 + boardY, -7.4);
+    const topGlass = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.0, 0.2), matGlass); topGlass.position.set(0, 7.0 + boardY, -5.2);
+    const signMesh = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.65, 0.15), matSignageText); signMesh.position.set(0, 5.8 + boardY, -4.7);
+
+    const sideBuildingL = new THREE.Mesh(new THREE.BoxGeometry(3.6, 5.8, 6.2), matSurroundingWalls); sideBuildingL.position.set(-9.4, 3.1 + boardY, -4.0);
+    const sideBuildingR = new THREE.Mesh(new THREE.BoxGeometry(3.6, 5.8, 6.2), matSurroundingWalls); sideBuildingR.position.set(9.4, 3.1 + boardY, -4.0);
+    const backResearchLab = new THREE.Mesh(new THREE.BoxGeometry(12.2, 3.4, 3.2), matSurroundingWalls); backResearchLab.position.set(0, 1.9 + boardY, -11.3);
+
+    const grayWindows = []; const sideWinGeo = new THREE.BoxGeometry(0.15, 0.7, 0.9);
+    for(let y = 1.6 + boardY; y <= 4.8 + boardY; y += 1.3) {
+        for(let z = -5.5; z <= -2.5; z += 1.5) {
+            const wL = new THREE.Mesh(sideWinGeo, matDarkWindowBox); wL.position.set(-9.4 + 1.81, y, z); grayWindows.push(wL);
+            const wR = new THREE.Mesh(sideWinGeo, matDarkWindowBox); wR.position.set(9.4 - 1.81, y, z); grayWindows.push(wR);
+        }
+    }
+
+    const sportsComplexGroup = new THREE.Group();
+    const runningTrackBase = new THREE.Mesh(new THREE.BoxGeometry(14.0, 0.05, 8.5), matTrackRed); runningTrackBase.position.set(-2.5, 0.43 + boardY, 1.5); sportsComplexGroup.add(runningTrackBase);
+    const bbCourtFloor = new THREE.Mesh(new THREE.BoxGeometry(9.5, 0.06, 5.5), matCourtBlue); bbCourtFloor.position.set(-2.5, 0.435 + boardY, 1.5); sportsComplexGroup.add(bbCourtFloor);
+    const bbInnerGreen = new THREE.Mesh(new THREE.BoxGeometry(8.5, 0.07, 4.5), matCourtGreen); bbInnerGreen.position.set(-2.5, 0.438 + boardY, 1.5); sportsComplexGroup.add(bbInnerGreen);
+    const trackLine1 = new THREE.Mesh(new THREE.BoxGeometry(13.5, 0.08, 0.06), matWhiteLine); trackLine1.position.set(-2.5, 0.44 + boardY, 5.5); sportsComplexGroup.add(trackLine1);
+    const centerRing = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.08, 24, 1, true), matWhiteLine); centerRing.position.set(-2.5, 0.442 + boardY, 1.5); sportsComplexGroup.add(centerRing);
+
+    function createBasketballHoop(xPos) {
+        const hoopGroup = new THREE.Group();
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.8), matGateMetal); pole.position.y = 0.9; hoopGroup.add(pole);
+        const board = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.5, 0.8), matWhiteLine); board.position.set(xPos > -2.5 ? -0.1 : 0.1, 1.6, 0); hoopGroup.add(board);
+        const rim = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.02, 8, 16), matTrackRed); rim.rotation.x = Math.PI/2; rim.position.set(xPos > -2.5 ? -0.25 : 0.25, 1.4, 0); hoopGroup.add(rim);
+        hoopGroup.position.set(xPos, 0.44 + boardY, 1.5); return hoopGroup;
+    }
+    const hoopL = createBasketballHoop(-6.8); const hoopR = createBasketballHoop(1.8); sportsComplexGroup.add(hoopL, hoopR);
+
+    const parkingGroup = new THREE.Group();
+    const asphaltFloor = new THREE.Mesh(new THREE.BoxGeometry(22.0, 0.05, 5.0), matAsphalt); asphaltFloor.position.set(0, 0.43 + boardY, 9.5); parkingGroup.add(asphaltFloor);
+    for(let i = -4; i <= 4; i++) { const line = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.07, 3.2), matWhiteLine); line.position.set(i * 2.2, 0.44 + boardY, 9.5); parkingGroup.add(line); }
+    
+    const carsGroup = new THREE.Group(); const carColors = [0x991b1b, 0x0369a1, 0xb45309, 0x059669];
+    for(let i = -3; i <= 3; i++) {
+        if(i === 0) continue; 
+        const car = new THREE.Group();
+        const carBase = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.45, 2.0), new THREE.MeshStandardMaterial({ color: carColors[Math.abs(i) % carColors.length], metalness: 0.5, roughness: 0.2 })); carBase.position.y = 0.22;
+        const carTop = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.28, 1.1), matGlass); carTop.position.set(0, 0.55, -0.05);
+        car.add(carBase, carTop); car.position.set(i * 2.2, 0.45 + boardY, 9.5); carsGroup.add(car);
+    }
+
+    const gateGroup = new THREE.Group();
+    const leftPost = new THREE.Mesh(new THREE.BoxGeometry(0.6, 3.0, 0.6), matGateMetal); leftPost.position.set(-4.5, 1.9 + boardY, 6.5);
+    const rightPost = leftPost.clone(); rightPost.position.x = 4.5;
+    const gateRoofArch = new THREE.Mesh(new THREE.BoxGeometry(9.6, 0.4, 1.0), matDarkSlate); gateRoofArch.position.set(0, 3.5 + boardY, 6.5); 
+    const barL = new THREE.Mesh(new THREE.BoxGeometry(4.3, 0.16, 0.08), matBlueAccent); barL.position.set(-2.15, 1.6 + boardY, 6.5); const barR = barL.clone(); barR.position.x = 2.15; 
+    gateGroup.add(leftPost, rightPost, gateRoofArch, barL, barR);
+
+    const studentsGroup = new THREE.Group(); const shirtColors = [0xdb2777, 0x0d9488, 0xea580c];
+    const studentPositions = [[-1.5, -0.5], [1.0, -1.0], [3.5, 3.5], [-1.0, 3.5]];
+    studentPositions.forEach((pos, idx) => {
+        const student = new THREE.Group(); const shirtMat = new THREE.MeshStandardMaterial({ color: shirtColors[idx % shirtColors.length] });
+        const legs = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.36, 0.18), matDarkSlate); legs.position.y = 0.18;
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.42, 0.2), shirtMat); torso.position.y = 0.57;
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 0.18), matSkin); head.position.y = 0.87;
+        student.add(legs, torso, head); student.position.set(pos[0], 0.4 + boardY, pos[1]); studentsGroup.add(student);
+    });
+
+    const trees = []; const treePositions = [[-11.5,3], [11.5,3], [-9,-10], [9,-10]];
+    treePositions.forEach(pos => {
+        const tGroup = new THREE.Group();
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 1.4, 6), matTrunk); trunk.position.y = 0.7;
+        const leaves = new THREE.Mesh(new THREE.DodecahedronGeometry(0.85, 1), matLeaves); leaves.position.y = 1.6;
+        tGroup.add(trunk, leaves); tGroup.position.set(pos[0], 0.4 + boardY, pos[1]); trees.push(tGroup);
+    });
+
+    const tl = gsap.timeline({ repeat: -1 });
+
+    tl.to({}, { duration: 0.1, onStart: () => {
+        campusGroup.clear(); campusGroup.rotation.y = 0; 
+        meshBase.position.y = -6; meshBase.scale.set(0.01, 1, 0.01); campusGroup.add(meshBase); 
+        gsap.to(meshBase.position, { y: boardY, duration: 1.2, ease: "power3.out" });
+        gsap.to(meshBase.scale, { x: 1, z: 1, duration: 1.2, ease: "power3.out" });
+        gsap.to(campusGroup.rotation, { y: 1.2, duration: 3.5, ease: "power1.inOut" });
+    }});
+
+    tl.to({}, { duration: 1.2, onStart: () => {
+        sideBuildingL.scale.y = sideBuildingR.scale.y = backResearchLab.scale.y = 0.01;
+        sideBuildingL.position.y = sideBuildingR.position.y = backResearchLab.position.y = 0.2 + boardY;
+        campusGroup.add(sideBuildingL, sideBuildingR, backResearchLab);
+        gsap.to([sideBuildingL.scale, sideBuildingR.scale, backResearchLab.scale], { y: 1, duration: 1.2, ease: "power2.out" });
+        gsap.to([sideBuildingL.position, sideBuildingR.position], { y: 3.1 + boardY, duration: 1.2, ease: "power2.out" });
+        gsap.to(backResearchLab.position, { y: 1.9 + boardY, duration: 1.2, ease: "power2.out" });
+        grayWindows.forEach(w => { w.scale.set(0,0,0); campusGroup.add(w); gsap.to(w.scale, { x: 1, y: 1, z: 1, duration: 0.4, delay: 0.4 }); });
+    }}, "+=1.0");
+
+    tl.to({}, { duration: 1.2, onStart: () => {
+        leftWing.scale.y = rightWing.scale.y = 0.01; leftWing.position.y = rightWing.position.y = 0.2 + boardY; campusGroup.add(leftWing, rightWing); 
+        gsap.to([leftWing.scale, rightWing.scale], { y: 1, duration: 1.2, ease: "power4.out" });
+        gsap.to([leftWing.position, rightWing.position], { y: 2.6 + boardY, duration: 1.2, ease: "power4.out" });
+    }}, "+=1.0");
+
+    tl.to({}, { duration: 0.8, onStart: () => { windows.forEach(w => { w.scale.set(0,0,0); campusGroup.add(w); gsap.to(w.scale, { x:1, y:1, z:1, duration: 0.4 }); }); }}, "+=0.6");
+
+    tl.to({}, { duration: 1.4, onStart: () => {
+        leftCPillar.position.y = rightCPillar.position.y = -5; centerHeader.scale.x = topCenter.position.y = 15;
+        topGlass.scale.set(0,0,0); signMesh.scale.set(0,0,0); entranceCanopy.scale.set(0,1,0);
+        campusGroup.add(leftCPillar, rightCPillar, centerHeader, topCenter, topGlass, signMesh, entranceCanopy);
+        gsap.to([leftCPillar.position, rightCPillar.position], { y: 2.8 + boardY, duration: 0.8 });
+        gsap.to(centerHeader.scale, { x: 1, duration: 0.8 });
+        gsap.to(entranceCanopy.scale, { x: 1, z: 1, duration: 0.5, delay: 0.3 });
+        gsap.to(topCenter.position, { y: 7.0 + boardY, duration: 0.9, ease: "bounce.out" });
+        gsap.to([topGlass.scale, signMesh.scale], { x: 1, y: 1, z: 1, duration: 0.4, delay: 0.5 });
+    }}, "+=0.8");
+
+    tl.to({}, { duration: 1.2, onStart: () => {
+        runningTrackBase.scale.set(0,1,0); bbCourtFloor.scale.set(0,1,0); bbInnerGreen.scale.set(0,1,0); hoopL.scale.set(0,0,0); hoopR.scale.set(0,0,0);
+        campusGroup.add(sportsComplexGroup); 
+        gsap.to([runningTrackBase.scale, bbCourtFloor.scale, bbInnerGreen.scale], { x: 1, z: 1, duration: 0.9, ease: "power2.out" });
+        gsap.to([hoopL.scale, hoopR.scale], { x: 1, y: 1, z: 1, duration: 0.6, delay: 0.4, ease: "back.out(1.5)" });
+        gsap.to(campusGroup.rotation, { y: 0.05, duration: 3.5, ease: "power2.out" });
+    }}, "+=0.8");
+
+    tl.to({}, { duration: 1.2, onStart: () => {
+        asphaltFloor.scale.set(0,1,0); campusGroup.add(parkingGroup); gsap.to(asphaltFloor.scale, { x: 1, z: 1, duration: 0.7 });
+        campusGroup.add(carsGroup); carsGroup.children.forEach((c, idx) => { const ty = c.position.y; c.position.y = 8; gsap.to(c.position, { y: ty, duration: 0.6, delay: idx * 0.08, ease: "bounce.out" }); });
+        campusGroup.add(studentsGroup); studentsGroup.children.forEach((s, idx) => { s.scale.set(0,0,0); gsap.to(s.scale, { x: 1, y: 1, z: 1, duration: 0.5, delay: idx * 0.05, ease: "back.out(1.5)" }); });
+    }}, "+=0.5");
+
+    tl.to({}, { duration: 1.2, onStart: () => {
+        leftPost.position.y = rightPost.position.y = -3; gateRoofArch.scale.set(0,1,0); barL.scale.x = barR.scale.x = 0; campusGroup.add(gateGroup); 
+        gsap.to([leftPost.position, rightPost.position], { y: 1.9 + boardY, duration: 0.6 });
+        gsap.to(gateRoofArch.scale, { x: 1, z: 1, duration: 0.5, delay: 0.3 });
+        gsap.to([barL.scale, barR.scale], { x: 1, duration: 0.5, delay: 0.4 });
+        trees.forEach(t => { t.scale.set(0,0,0); campusGroup.add(t); gsap.to(t.scale, { x:1, y:1, z:1, duration: 0.6, ease: "elastic.out(1, 0.75)" }); });
+    }}, "+=0.5");
+
+    tl.to({}, { duration: 8.5 });
+
+    function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+        wWidth = viewport.clientWidth; wHeight = viewport.clientHeight;
+        renderer.setSize(wWidth, wHeight);
+        aspect = wWidth / wHeight;
+        camera.left = -d * aspect; camera.right = d * aspect;
+        camera.updateProjectionMatrix();
+    });
+</script>
+
+</body>
+</html>

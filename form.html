@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enrollment Registration - Datamex College of Saint Adeline</title>
+    <meta
+      name="description"
+      content="Online enrollment registration form for Datamex College of Saint Adeline."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="navbar-only">
+      <nav class="navbar">
+        <div class="brand"><img src="pictures/datamex logo.jpg" alt="School Logo"> Datamex College of Saint Adeline</div>
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="academics.html">Academics</a></li>
+          <li><a href="registration.html" class="active">Registration</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="form-page-main">
+      <div class="form-container">
+        <div class="form-header">
+          <h1>Application Form</h1>
+          <p>Please fill out the form accurately to process your enrollment.</p>
+        </div>
+
+        <form id="enrollment-form" action="#" method="POST" enctype="multipart/form-data">
+          
+          <div class="form-section-title">Personal Information</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="first-name">First Name</label>
+              <input type="text" id="first-name" name="first-name" class="letters-only" required />
+            </div>
+            <div class="form-group">
+              <label for="last-name">Last Name</label>
+              <input type="text" id="last-name" name="last-name" class="letters-only" required />
+            </div>
+            <div class="form-group">
+              <label for="dob">Date of Birth</label>
+              <input type="date" id="dob" name="dob" max="2026-12-31" required />
+            </div>
+            <div class="form-group">
+              <label>Gender</label>
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="gender" value="male" required /> Male
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="gender" value="female" /> Female
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section-title">Contact Information</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" name="email" required />
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone Number</label>
+              <input type="tel" id="phone" name="phone" class="numbers-only" placeholder="09XXXXXXXXX" maxlength="11" required />
+            </div>
+            <div class="form-group full-width">
+              <label for="address">Complete Address</label>
+              <textarea id="address" name="address" required></textarea>
+            </div>
+          </div>
+
+          <div class="form-section-title">Educational Background</div>
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="last-school">Huling Paaralang Pinasukan (Last School Attended)</label>
+              <input type="text" id="last-school" name="last-school" class="letters-only" required />
+            </div>
+            <div class="form-group full-width">
+              <label for="grad-year">Taon ng Pagtatapos (Year of Graduation)</label>
+              <input type="text" id="grad-year" name="grad-year" class="numbers-only" placeholder="YYYY" maxlength="4" required />
+            </div>
+          </div>
+
+          <div class="form-section-title">Enrollment Details</div>
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="education-level">Education Level</label>
+              <select id="education-level" name="education-level" required>
+                <option value="college" selected>College / Higher Education</option>
+                <option value="shs">Senior High School</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="program" id="program-label">Kursong Kukunin (Select Course)</label>
+              <select id="program" name="program" required>
+                <option value="" disabled selected>Choose a program...</option>
+                <option value="bsit">BS in Information Technology</option>
+                <option value="bshm">BS in Hospitality Management</option>
+                <option value="com-prog">Computer Programming (2 Years)</option>
+                <option value="hrm">Hotel and Restaurant Management (2 Years)</option>
+                <option value="animation">Computer Animation (2 Years)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="year-level" id="year-label">Year Level o Grade Level</label>
+              <select id="year-level" name="year-level" required>
+                <option value="" disabled selected>Choose level...</option>
+                <option value="1st">1st Year</option>
+                <option value="2nd">2nd Year</option>
+                <option value="3rd">3rd Year</option>
+                <option value="4th">4th Year</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="semester">Semester o School Year</label>
+              <select id="semester" name="semester" required>
+                <option value="" disabled selected>Choose sem/SY...</option>
+                <option value="1st-sem">1st Semester</option>
+                <option value="2nd-sem">2nd Semester</option>
+                <option value="full-sy">Full School Year</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="branch">Preferred Branch</label>
+              <select id="branch" name="branch" required>
+                <option value="" disabled selected>Choose branch...</option>
+                <option value="valenzuela">Valenzuela</option>
+                <option value="meycauayan">Meycauayan</option>
+                <option value="fairview">Fairview</option>
+                <option value="caloocan">Caloocan</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-section-title">Parent/Guardian Information</div>
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="guardian-name">Pangalan ng Magulang o Guardian</label>
+              <input type="text" id="guardian-name" name="guardian-name" class="letters-only" required />
+            </div>
+            <div class="form-group">
+              <label for="guardian-phone">Contact Number</label>
+              <input type="tel" id="guardian-phone" name="guardian-phone" class="numbers-only" placeholder="09XXXXXXXXX" maxlength="11" required />
+            </div>
+            <div class="form-group">
+              <label for="guardian-occupation">Trabaho (Occupation)</label>
+              <input type="text" id="guardian-occupation" name="guardian-occupation" class="letters-only" />
+            </div>
+          </div>
+
+          <div class="form-section-title">Required Documents (Upload File)</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="doc-psa">PSA Birth Certificate</label>
+              <input type="file" id="doc-psa" name="doc-psa" class="doc-upload" accept=".pdf,.jpg,.jpeg,.png" required />
+            </div>
+            <div class="form-group">
+              <label for="doc-card">Form 137 o Form 138 / Report Card</label>
+              <input type="file" id="doc-card" name="doc-card" class="doc-upload" accept=".pdf,.jpg,.jpeg,.png" required />
+            </div>
+            <div class="form-group">
+              <label for="doc-moral">Good Moral Certificate</label>
+              <input type="file" id="doc-moral" name="doc-moral" class="doc-upload" accept=".pdf,.jpg,.jpeg,.png" required />
+            </div>
+            <div class="form-group">
+              <label for="doc-id">ID Picture</label>
+              <input type="file" id="doc-id" name="doc-id" class="doc-upload" accept=".jpg,.jpeg,.png" required />
+            </div>
+            <div class="form-group">
+              <label for="doc-tor">Transcript of Records (For Transferees / College)</label>
+              <input type="file" id="doc-tor" name="doc-tor" accept=".pdf,.jpg,.jpeg,.png" />
+            </div>
+            <div class="form-group">
+              <label for="doc-others">Iba pang dokumentong hinihingi ng paaralan</label>
+              <input type="file" id="doc-others" name="doc-others" accept=".pdf,.jpg,.jpeg,.png" />
+            </div>
+            
+            <div class="form-group full-width">
+              <div class="checkbox-group">
+                <input type="checkbox" id="to-follow-docs" name="to-follow-docs" />
+                <label for="to-follow-docs"><strong>To follow ang mga dokumento.</strong> I-check ito kung kasalukuyan pang pinoproseso o kulang ang iyong mga dokumento upang pansamantalang maipasa ang form.</label>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn">Submit Registration</button>
+        </form>
+      </div>
+    </main>
+
+    <div class="modal-overlay" id="success-modal">
+      <div class="modal-box">
+        <h3>Registration Successful!</h3>
+        <p>Your application form has been submitted successfully. Please wait for an email or text update from your preferred branch.</p>
+        <button class="modal-close-btn" id="close-modal-btn">OK</button>
+      </div>
+    </div>
+
+    <footer id="contact" class="footer">
+      <h2>Contact Us</h2>
+      <p>2nd flr. Gotaco Bldg 2, 32 MacArthur Highway, Valenzuela, 1440 Metro Manila</p>
+      <p>Facebook: https://www.facebook.com/datamexcollegeofstadeline </p>
+      <p>Telephone: 8292-7536</p>
+    </footer>
+
+    <script>
+      const educationLevel = document.getElementById('education-level');
+      const programLabel = document.getElementById('program-label');
+      const programSelect = document.getElementById('program');
+      const yearLabel = document.getElementById('year-label');
+      const yearSelect = document.getElementById('year-level');
+      
+      const enrollmentForm = document.getElementById('enrollment-form');
+      const successModal = document.getElementById('success-modal');
+      const closeModalBtn = document.getElementById('close-modal-btn');
+      
+      const toFollowCheckbox = document.getElementById('to-follow-docs');
+      const requiredDocs = document.querySelectorAll('.doc-upload');
+
+      const collegePrograms = `
+        <option value="" disabled selected>Choose a program...</option>
+        <option value="bsit">BS in Information Technology</option>
+        <option value="bshm">BS in Hospitality Management</option>
+        <option value="com-prog">Computer Programming (2 Years)</option>
+        <option value="hrm">Hotel and Restaurant Management (2 Years)</option>
+        <option value="animation">Computer Animation (2 Years)</option>
+      `;
+
+      const collegeYears = `
+        <option value="" disabled selected>Choose level...</option>
+        <option value="1st">1st Year</option>
+        <option value="2nd">2nd Year</option>
+        <option value="3rd">3rd Year</option>
+        <option value="4th">4th Year</option>
+      `;
+
+      const shsPrograms = `
+        <option value="" disabled selected>Choose a strand...</option>
+        <option value="ict">TVL - Information and Communications Technology (ICT)</option>
+        <option value="he">TVL - Home Economics (HE)</option>
+        <option value="abm">Academic - Accountancy, Business, and Management (ABM)</option>
+        <option value="gas">Academic - General Academic Strand (GAS)</option>
+      `;
+
+      const shsYears = `
+        <option value="" disabled selected>Choose grade...</option>
+        <option value="11">Grade 11</option>
+        <option value="12">Grade 12</option>
+      `;
+
+      educationLevel.addEventListener('change', function() {
+        if (this.value === 'shs') {
+          programLabel.textContent = 'Kursong Kukunin (Select Strand)';
+          programSelect.innerHTML = shsPrograms;
+          yearLabel.textContent = 'Year Level o Grade Level';
+          yearSelect.innerHTML = shsYears;
+        } else {
+          programLabel.textContent = 'Kursong Kukunin (Select Course)';
+          programSelect.innerHTML = collegePrograms;
+          yearLabel.textContent = 'Year Level o Grade Level';
+          yearSelect.innerHTML = collegeYears;
+        }
+      });
+
+      document.querySelectorAll('.letters-only').forEach(input => {
+        input.addEventListener('input', function() {
+          this.value = this.value.replace(/[0-9]/g, '');
+        });
+      });
+
+      document.querySelectorAll('.numbers-only').forEach(input => {
+        input.addEventListener('input', function() {
+          let cleanValue = this.value.replace(/[^0-9]/g, '');
+          if (cleanValue.length > 11) {
+            cleanValue = cleanValue.substring(0, 11);
+          }
+          this.value = cleanValue;
+        });
+      });
+
+      toFollowCheckbox.addEventListener('change', function() {
+        requiredDocs.forEach(doc => {
+          if (this.checked) {
+            doc.removeAttribute('required');
+          } else {
+            doc.setAttribute('required', 'required');
+          }
+        });
+      });
+
+      enrollmentForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        successModal.classList.add('active');
+      });
+
+      closeModalBtn.addEventListener('click', function() {
+        successModal.classList.remove('active');
+        enrollmentForm.reset();
+        window.location.reload();
+      });
+    </script>
+  </body>
+</html>

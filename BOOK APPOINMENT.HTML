@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment - Solsmile Dental Clinic</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        html, body {
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            background: url("../IMAGES/about%20us%20pprofile.jpg") no-repeat center center fixed;
+            background-size: cover;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ENTRANCE ANIMATIONS */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* HEADER / NAVBAR */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 50px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            animation: fadeInDown 0.8s ease-out;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .logo-area {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00838f;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-sub {
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: #333;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 35px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 600;
+            font-size: 15px;
+            transition: color 0.3s;
+        }
+
+        nav ul li a.active, nav ul li a:hover {
+            color: #00bcd4;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .phone-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .phone-icon {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #00bcd4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #00bcd4;
+            font-size: 18px;
+        }
+
+        .phone-info .label {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .phone-info .number {
+            font-size: 15px;
+            font-weight: bold;
+            color: #222;
+        }
+
+        .btn-book {
+            background-color: #4dd0e1;
+            color: white;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 10px rgba(77, 208, 225, 0.3);
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .btn-book:hover {
+            background-color: #26c6da;
+            transform: translateY(-2px);
+        }
+
+        /* MAIN CONTAINER */
+        .appointment-container {
+            margin-top: 85px;
+            padding: 40px 20px 60px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            flex: 1;
+        }
+
+        /* HEADER SECTION */
+        .appointment-header {
+            text-align: center;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .appointment-header h1 {
+            font-size: 42px;
+            font-weight: 800;
+            color: #1a252c;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .appointment-header p {
+            font-size: 16px;
+            color: #555;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        /* FORM WRAPPER */
+        .form-wrapper {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-row-full {
+            display: grid;
+            grid-template-columns: 1fr;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a252c;
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background: #ffffff;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #00bcd4;
+            box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+            max-height: 200px;
+        }
+
+        .required {
+            color: #e53935;
+            font-weight: bold;
+        }
+
+        /* TIME SLOT GRID */
+        .time-slot-group {
+            margin-bottom: 25px;
+        }
+
+        .time-slot-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a252c;
+            margin-bottom: 12px;
+            letter-spacing: 0.3px;
+        }
+
+        .time-slot-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .time-slot {
+            position: relative;
+        }
+
+        .time-slot input[type="radio"] {
+            display: none;
+        }
+
+        .time-slot label {
+            display: block;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #ffffff;
+            font-weight: 600;
+            color: #555;
+            margin: 0;
+        }
+
+        .time-slot input[type="radio"]:checked + label {
+            background: #00bcd4;
+            color: white;
+            border-color: #00bcd4;
+            box-shadow: 0 4px 12px rgba(0, 188, 212, 0.3);
+        }
+
+        .time-slot label:hover {
+            border-color: #00bcd4;
+        }
+
+        /* SERVICE TYPE GRID */
+        .service-checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #00bcd4;
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        /* BUTTON GROUP */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn-submit, .btn-reset {
+            padding: 14px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #00bcd4, #00838f);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);
+            min-width: 180px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 188, 212, 0.4);
+        }
+
+        .btn-reset {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+
+        .btn-reset:hover {
+            background: #e8e8e8;
+            border-color: #999;
+        }
+
+        /* SUCCESS MESSAGE */
+        .success-message {
+            display: none;
+            background: #c8e6c9;
+            border: 2px solid #4caf50;
+            color: #2e7d32;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            animation: slideInLeft 0.5s ease-out;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .time-slot-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .service-checkbox-group {
+                grid-template-columns: 1fr;
+            }
+
+            .form-wrapper {
+                padding: 30px 20px;
+            }
+
+            .appointment-header h1 {
+                font-size: 32px;
+            }
+
+            nav ul {
+                gap: 20px;
+            }
+
+            header {
+                padding: 15px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo-area">
+            <span class="logo-text">solsmile</span>
+            <span class="logo-sub">DENTAL CLINIC</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="../HOME.HTML">HOME</a></li>
+                <li><a href="ABOUT%20US.HTML">ABOUT US</a></li>
+                <li><a href="SERVICES.HTML">SERVICES</a></li>
+                <li><a href="CONTACT.HTML">CONTACT</a></li>
+            </ul>
+        </nav>
+        <div class="header-right">
+            <div class="phone-box">
+                <div class="phone-icon">📞</div>
+                <div class="phone-info">
+                    <div class="label">Phone Number</div>
+                    <div class="number">0912-3456-789</div>
+                </div>
+            </div>
+            <button class="btn-book">
+                <span>📅</span> Book Appointment
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <div class="appointment-container">
+        
+        <!-- HEADER SECTION -->
+        <div class="appointment-header">
+            <h1>📅 Schedule Your Appointment</h1>
+            <p>Book your dental visit with our expert team. We offer convenient scheduling and same-day appointments when available. Fill out the form below to reserve your spot.</p>
+        </div>
+
+        <!-- APPOINTMENT BOOKING FORM -->
+        <div class="form-wrapper">
+            
+            <!-- SUCCESS MESSAGE -->
+            <div class="success-message" id="successMessage">
+                ✓ Your appointment has been booked successfully! We will confirm via email shortly.
+            </div>
+
+            <form id="appointmentForm">
+                
+                <!-- ROW 1: NAME & EMAIL -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="patientName">Full Name <span class="required">*</span></label>
+                        <input type="text" id="patientName" name="patientName" required placeholder="Enter your full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="patientEmail">Email Address <span class="required">*</span></label>
+                        <input type="email" id="patientEmail" name="patientEmail" required placeholder="your@email.com">
+                    </div>
+                </div>
+
+                <!-- ROW 2: PHONE & AGE -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="patientPhone">Phone Number <span class="required">*</span></label>
+                        <input type="tel" id="patientPhone" name="patientPhone" required placeholder="0912-345-6789">
+                    </div>
+                    <div class="form-group">
+                        <label for="patientAge">Age <span class="required">*</span></label>
+                        <input type="number" id="patientAge" name="patientAge" min="1" max="120" required placeholder="Enter your age">
+                    </div>
+                </div>
+
+                <!-- ROW 3: PREFERRED DATE & TIME -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="appointmentDate">Preferred Date <span class="required">*</span></label>
+                        <input type="date" id="appointmentDate" name="appointmentDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentDoctor">Preferred Dentist</label>
+                        <select id="appointmentDoctor" name="appointmentDoctor">
+                            <option value="">Select Dentist (Optional)</option>
+                            <option value="dr-santos">Dr. Maria Santos - General Dentistry</option>
+                            <option value="dr-cruz">Dr. Juan Cruz - Orthodontist</option>
+                            <option value="dr-reyes">Dr. Ana Reyes - Cosmetic Dentistry</option>
+                            <option value="any">Any Available Dentist</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- TIME SLOTS -->
+                <div class="time-slot-group">
+                    <label>Preferred Time <span class="required">*</span></label>
+                    <div class="time-slot-container">
+                        <div class="time-slot">
+                            <input type="radio" id="time-9am" name="appointmentTime" value="9:00 AM" required>
+                            <label for="time-9am">9:00 AM</label>
+                        </div>
+                        <div class="time-slot">
+                            <input type="radio" id="time-10am" name="appointmentTime" value="10:00 AM">
+                            <label for="time-10am">10:00 AM</label>
+                        </div>
+                        <div class="time-slot">
+                            <input type="radio" id="time-2pm" name="appointmentTime" value="2:00 PM">
+                            <label for="time-2pm">2:00 PM</label>
+                        </div>
+                        <div class="time-slot">
+                            <input type="radio" id="time-3pm" name="appointmentTime" value="3:00 PM">
+                            <label for="time-3pm">3:00 PM</label>
+                        </div>
+                        <div class="time-slot">
+                            <input type="radio" id="time-4pm" name="appointmentTime" value="4:00 PM">
+                            <label for="time-4pm">4:00 PM</label>
+                        </div>
+                        <div class="time-slot">
+                            <input type="radio" id="time-5pm" name="appointmentTime" value="5:00 PM">
+                            <label for="time-5pm">5:00 PM</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SERVICE TYPE -->
+                <div class="form-group">
+                    <label>Type of Service <span class="required">*</span></label>
+                    <div class="service-checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="service-checkup" name="service" value="Routine Checkup" required>
+                            <label for="service-checkup">Routine Checkup & Cleaning</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="service-teeth-whitening" name="service" value="Teeth Whitening">
+                            <label for="service-teeth-whitening">Teeth Whitening</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="service-filling" name="service" value="Dental Filling">
+                            <label for="service-filling">Dental Filling</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="service-extraction" name="service" value="Tooth Extraction">
+                            <label for="service-extraction">Tooth Extraction</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="service-implants" name="service" value="Dental Implants">
+                            <label for="service-implants">Dental Implants</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="service-braces" name="service" value="Braces & Orthodontics">
+                            <label for="service-braces">Braces & Orthodontics</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADDITIONAL NOTES -->
+                <div class="form-group form-row-full">
+                    <label for="additionalNotes">Additional Notes / Concerns</label>
+                    <textarea id="additionalNotes" name="additionalNotes" placeholder="Tell us if you have any dental concerns, medications, or allergies we should know about..."></textarea>
+                </div>
+
+                <!-- BUTTONS -->
+                <div class="button-group">
+                    <button type="submit" class="btn-submit">✓ Book Appointment</button>
+                    <button type="reset" class="btn-reset">Clear Form</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT FOR FORM HANDLING -->
+    <script>
+        const form = document.getElementById('appointmentForm');
+        const successMessage = document.getElementById('successMessage');
+
+        // Set minimum date to today
+        const today = new Date();
+        const dateInput = document.getElementById('appointmentDate');
+        dateInput.min = today.toISOString().split('T')[0];
+
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Get form data
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            // Get selected services
+            const selectedServices = Array.from(document.querySelectorAll('input[name="service"]:checked'))
+                .map(checkbox => checkbox.value);
+
+            // Validate at least one service is selected
+            if (selectedServices.length === 0) {
+                alert('Please select at least one service type.');
+                return;
+            }
+
+            // Create appointment summary
+            const appointmentSummary = {
+                name: data.patientName,
+                email: data.patientEmail,
+                phone: data.patientPhone,
+                age: data.patientAge,
+                date: data.appointmentDate,
+                time: data.appointmentTime,
+                doctor: data.appointmentDoctor || 'Any Available',
+                services: selectedServices,
+                notes: data.additionalNotes
+            };
+
+            // Log appointment data (in real scenario, send to server)
+            console.log('Appointment Booked:', appointmentSummary);
+
+            // Show success message
+            successMessage.classList.add('show');
+            
+            // Scroll to success message
+            successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            // Reset form
+            form.reset();
+
+            // Hide success message after 5 seconds
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 5000);
+
+            // Optional: Send data to server
+            // fetch('/api/appointments', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify(appointmentSummary)
+            // }).then(response => response.json()).catch(error => console.error('Error:', error));
+        });
+
+        // Validate time selection
+        document.querySelectorAll('input[name="appointmentTime"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                // Optional: Add custom logic for time selection
+            });
+        });
+    </script>
+
+</body>
+</html>

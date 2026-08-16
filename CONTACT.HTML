@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Solsmile Dental Clinic</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        html, body {
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            background: url("../IMAGES/BACKGROUND.jpg") no-repeat center center fixed;
+            background-size: cover;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ENTRANCE ANIMATIONS */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* HEADER / NAVBAR */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 50px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            animation: fadeInDown 0.8s ease-out;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .logo-area {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00838f;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-sub {
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: #333;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 35px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 600;
+            font-size: 15px;
+            transition: color 0.3s;
+        }
+
+        nav ul li a.active, nav ul li a:hover {
+            color: #00bcd4;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .phone-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .phone-icon {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #00bcd4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #00bcd4;
+            font-size: 18px;
+        }
+
+        .phone-info .label {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .phone-info .number {
+            font-size: 15px;
+            font-weight: bold;
+            color: #222;
+        }
+
+        .btn-book {
+            background-color: #4dd0e1;
+            color: white;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 10px rgba(77, 208, 225, 0.3);
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .btn-book:hover {
+            background-color: #26c6da;
+            transform: translateY(-2px);
+        }
+
+        /* CONTACT MAIN CONTAINER - Inilipat nang mas pababa */
+        .contact-main-container {
+            margin-top: 115px;
+            padding: 20px 0px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+        }
+
+        /* TOP TITLE SECTION */
+        .contact-header-text {
+            text-align: center;
+            animation: fadeInUp 0.8s ease-out;
+            margin-bottom: 5px;
+            padding: 0 20px;
+        }
+
+        .contact-header-text h1 {
+            font-size: 38px;
+            font-weight: 800;
+            color: #1a252c;
+            margin-bottom: 4px;
+        }
+
+        .contact-header-text p {
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* CONTACT CONTENT BODY (MAP BG + DETAILS + IMAGE) - Full Size Width */
+        .contact-body-wrapper {
+            position: relative;
+            width: 100%;
+            height: 670px;
+            border-radius: 0px;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            animation: fadeInUp 1s ease-out;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        /* BACKGROUND MAP IMAGE */
+        .map-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        /* MAP PIN CARD */
+        .map-pin-card {
+            position: absolute;
+            top: 23%;
+            left: 75%; 
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            background: #ffffff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            border: 1px solid #ddd;
+        }
+
+        .map-pin-card .pin-logo {
+            font-size: 13px;
+            font-weight: bold;
+            color: #00838f;
+        }
+
+        .map-pin-card .pin-info h5 {
+            font-size: 12.5px;
+            font-weight: 800;
+            color: #1a252c;
+        }
+
+        .map-pin-card .pin-info .review-text {
+            font-size: 10.5px;
+            color: #f39c12;
+            font-weight: 600;
+        }
+
+        .map-pin-card .pin-info .location-text {
+            font-size: 10.5px;
+            color: #333333;
+            font-weight: 600;
+        }
+
+        /* MAP MARKER ICON */
+        .map-marker-icon {
+            position: absolute;
+            top: 28%;
+            left: 75%;
+            transform: translate(-50%, 0) rotate(-45deg);
+            z-index: 2;
+            width: 44px;
+            height: 44px;
+            background: #00bcd4;
+            border-radius: 50% 50% 50% 0;
+            box-shadow: 0 5px 12px rgba(0,0,0,0.45);
+        }
+
+        /* INFO BOX SA IBABA KALIWA - Pinalawak ang width at ginawang fade/translucent */
+        .contact-info-box {
+            position: relative;
+            z-index: 3;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 28px 36px;
+            border-radius: 16px;
+            margin: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-width: 520px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .contact-bullet {
+            width: 10px;
+            height: 10px;
+            background-color: #00bcd4;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .contact-detail {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .contact-detail h4 {
+            font-size: 14.5px;
+            font-weight: 800;
+            color: #1a252c;
+            min-width: 80px;
+        }
+
+        .contact-detail p {
+            font-size: 14px;
+            color: #222;
+            font-weight: 500;
+        }
+
+        /* IMAGE SA KANAN (STAFF/PERSON) */
+        .contact-person-image {
+            position: relative;
+            z-index: 3;
+            height: 100%;
+            display: flex;
+            align-items: flex-end;
+            margin-right: -220px;
+            margin-bottom: -10px;
+        }
+
+        .contact-person-image img {
+            height: 94%;
+            width: auto;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo-area">
+            <span class="logo-text">solsmile</span>
+            <span class="logo-sub">DENTAL CLINIC</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="../HOME.HTML">HOME</a></li>
+                <li><a href="ABOUT%20US.HTML">ABOUT US</a></li>
+                <li><a href="SERVICES.HTML">SERVICES</a></li>
+                <li><a href="CONTACT.HTML" class="active">CONTACT</a></li>
+            </ul>
+        </nav>
+        <div class="header-right">
+            <div class="phone-box">
+                <div class="phone-icon">📞</div>
+                <div class="phone-info">
+                    <div class="label">Phone Number</div>
+                    <div class="number">0912-3456-789</div>
+                </div>
+            </div>
+            <a href="BOOK%20APPOINMENT.HTML" style="text-decoration: none;">
+                <button class="btn-book">
+                    <span>📅</span> Book Appointment
+                </button>
+            </a>
+        </div>
+    </header>
+
+    <!-- CONTACT MAIN CONTENT CONTAINER -->
+    <div class="contact-main-container">
+        
+        <!-- HEADER TITLE -->
+        <div class="contact-header-text">
+            <h1>We’re Here to Help You Smile</h1>
+            <p>Have questions or ready to schedule your visit? Reach out to our friendly team today—we’re always happy to assist you.</p>
+        </div>
+
+        <!-- BODY WRAPPER (MAP BACKGROUND + MAP PIN + INFO + PERSON IMAGE) -->
+        <div class="contact-body-wrapper">
+            <!-- Map Background Image -->
+            <img src="../IMAGES/map1.png" alt="Map Location" class="map-background" onerror="this.src='https://via.placeholder.com/1400x670?text=Map+Background+Placeholder'">
+
+            <!-- Map Location Marker Card -->
+            <div class="map-pin-card">
+                <div class="pin-logo">solsmile</div>
+                <div class="pin-info">
+                    <h5>SOLSMILE DENTAL CLINIC</h5>
+                    <p class="review-text">★ 5.0 (120+ Reviews)</p>
+                    <p class="location-text">Quezon City, Metro Manila</p>
+                </div>
+            </div>
+            <div class="map-marker-icon"></div>
+
+            <!-- Contact Details Box (Bottom Left) -->
+            <div class="contact-info-box">
+                <div class="contact-item">
+                    <div class="contact-bullet"></div>
+                    <div class="contact-detail">
+                        <h4>Phone:</h4>
+                        <p>(02) 8700-1234 / 0912-3456-789</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-bullet"></div>
+                    <div class="contact-detail">
+                        <h4>Email:</h4>
+                        <p>solsmil3dental.com</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-bullet"></div>
+                    <div class="contact-detail">
+                        <h4>Address:</h4>
+                        <p>2nd Flr, Sol Bldg, Quezon City</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-bullet"></div>
+                    <div class="contact-detail">
+                        <h4>Hours:</h4>
+                        <p>Mon-Sat (9AM - 6PM)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Person Image (Right Side) -->
+            <div class="contact-person-image">
+                <img src="../IMAGES/arrow1.png" alt="Contact Support" onerror="this.src='https://via.placeholder.com/380x620?text=Person+Image+Placeholder'">
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
